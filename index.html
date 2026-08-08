@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E7ECEA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="The Shelf">
+<title>The Shelf</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230C1416'/%3E%3Crect x='24' y='8' width='16' height='10' fill='%234FD1C5'/%3E%3Crect x='18' y='18' width='28' height='38' rx='3' fill='%234FD1C5'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C1416'/%3E%3Crect x='68' y='24' width='44' height='28' fill='%234FD1C5'/%3E%3Crect x='50' y='52' width='80' height='106' rx='8' fill='%234FD1C5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --glass:#E7ECEA;
+  --panel:#FFFFFF;
+  --ink:#000000;
+  --line:#AEBAB7;
+  --accent:#0E6E70;
+  --onAccent:#FFFFFF;
+  --vetiver:#1F4A3D;
+  --warn:#9B2C2C;
+  --shadow:0 1px 0 rgba(0,0,0,.12);
+}
+html[data-theme="dark"]{
+  --glass:#0C1416;
+  --panel:#152023;
+  --ink:#FFFFFF;
+  --line:#31423F;
+  --accent:#4FD1C5;
+  --onAccent:#0C1416;
+  --vetiver:#6FC2A0;
+  --warn:#FF8A8A;
+  --shadow:0 1px 0 rgba(255,255,255,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--glass);color:var(--ink);
+  font-family:"Karla",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.4;
+  padding-bottom:96px;
+}
+h1,h2,h3{margin:0}
+button,input,select,textarea{font:inherit;color:var(--ink)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.disp{font-family:"Bodoni Moda",Georgia,serif;font-weight:600;letter-spacing:-.01em}
+.lbl{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:700}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:40;background:var(--glass);
+  border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;
+}
+.brandrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.brand{font-size:30px;line-height:.95}
+.brand em{font-style:italic;font-weight:400}
+.count{font-size:20px;font-weight:700;padding-bottom:2px;letter-spacing:0}
+.iconbtn{
+  background:none;border:1px solid var(--line);border-radius:999px;
+  width:34px;height:34px;display:grid;place-items:center;cursor:pointer;font-size:15px
+}
+.tools{display:flex;gap:6px;align-items:center}
+#search{
+  width:100%;margin-top:10px;padding:9px 12px;border:1px solid var(--line);
+  border-radius:999px;background:var(--panel);outline:none
+}
+#search:focus{border-color:var(--ink)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  white-space:nowrap;border:1px solid var(--line);background:none;border-radius:999px;
+  padding:6px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer
+}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--glass);border-color:var(--ink)}
+
+/* ---------- ledger ---------- */
+.ledger{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--line);border-bottom:1px solid var(--line)
+}
+.ledger div{background:var(--glass);padding:12px 6px;text-align:center}
+.ledger .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:500;display:block;line-height:1.1}
+.ledger .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;opacity:1;margin-top:3px;display:block}
+
+/* ---------- grid ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr);max-width:1100px;margin:0 auto}}
+.card{
+  background:var(--panel);border:1px solid var(--line);cursor:pointer;
+  display:flex;flex-direction:column;overflow:hidden;position:relative
+}
+.shot{position:relative;aspect-ratio:3/4;background:var(--glass);overflow:hidden}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.noshot{width:100%;height:100%;display:grid;place-items:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.dupeflag{
+  position:absolute;top:0;left:0;background:var(--accent);color:var(--onAccent);
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:3px 7px
+}
+.fill{position:absolute;right:6px;top:6px;bottom:6px;width:5px;border:1px solid var(--line);background:var(--panel)}
+.fill i{position:absolute;bottom:0;left:0;right:0;background:var(--accent);display:block}
+.meta{padding:9px 10px 11px}
+.cname{font-size:17px;line-height:1.05;font-family:"Bodoni Moda",Georgia,serif;font-weight:600}
+.chouse{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-top:4px}
+.dial{display:flex;gap:3px;margin-top:8px;align-items:center}
+.dial b{
+  width:20px;height:14px;border:1px solid var(--line);display:grid;place-items:center;
+  font-size:8px;font-weight:700;letter-spacing:.04em
+}
+.dial b.on{background:var(--vetiver);border-color:var(--vetiver);color:var(--glass)}
+html[data-theme="dark"] .dial b.on{color:#0C1416}
+
+/* ---------- sheet ---------- */
+.sheet{
+  position:fixed;inset:0;z-index:60;background:var(--glass);overflow-y:auto;
+  display:none;padding:0 0 120px
+}
+.sheet.open{display:block}
+.sheetbar{
+  position:sticky;top:0;background:var(--glass);border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px
+}
+.sheetbody{padding:14px;max-width:640px;margin:0 auto}
+.hero{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line);background:var(--panel);display:block}
+.dname{font-size:34px;line-height:1;margin-top:14px}
+.dhouse{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-top:6px}
+.rows{margin-top:18px;border-top:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding-top:3px}
+.row .v{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:14px}
+.row .v.txt{font-family:"Karla",sans-serif;font-size:14px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.btn{
+  border:1px solid var(--ink);background:none;padding:12px 10px;cursor:pointer;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center
+}
+.btn.solid{background:var(--ink);color:var(--glass)}
+.btn.wide{grid-column:1/-1}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+
+/* ---------- form ---------- */
+.field{margin-top:14px}
+.field label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:5px}
+.field input[type=text],.field input[type=number],.field select,.field textarea{
+  width:100%;padding:10px 11px;border:1px solid var(--line);background:var(--panel);border-radius:0;outline:none
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink)}
+.field textarea{min-height:80px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pickers{display:flex;flex-wrap:wrap;gap:6px}
+.pick{
+  border:1px solid var(--line);background:none;padding:8px 11px;cursor:pointer;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700
+}
+.pick[aria-pressed="true"]{background:var(--vetiver);border-color:var(--vetiver);color:var(--glass)}
+html[data-theme="dark"] .pick[aria-pressed="true"]{color:#0C1416}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.photobox{display:flex;gap:10px;align-items:center;margin-top:6px}
+.photobox img{width:74px;height:98px;object-fit:cover;border:1px solid var(--line)}
+input[type=file]{display:none}
+
+/* ---------- fab ---------- */
+.fab{
+  position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:50;
+  background:var(--ink);color:var(--glass);border:none;width:56px;height:56px;border-radius:50%;
+  font-size:26px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28)
+}
+.pickme{
+  position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:50;
+  background:var(--accent);color:var(--onAccent);border:none;padding:0 18px;height:56px;border-radius:999px;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.28)
+}
+.empty{padding:60px 24px;text-align:center}
+.empty p{margin:10px 0 0}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:90px;z-index:80;
+  background:var(--ink);color:var(--glass);padding:10px 16px;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:700;display:none
+}
+.toast.show{display:block}
+
+@media(prefers-reduced-motion:no-preference){
+  .card{transition:transform .12s ease}
+  .card:active{transform:scale(.985)}
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- print ---------- */
+@media print{
+  html,body{background:#fff !important;color:#000 !important}
+  :root{--glass:#fff;--panel:#fff;--ink:#000;--line:#000;--accent:#000;--onAccent:#fff;--vetiver:#000;--warn:#000}
+  header,.fab,.pickme,.chips,#search,.actions,.iconbtn,.toast{display:none !important}
+  .sheet{display:none !important}
+  .grid{display:block;padding:0}
+  .card{border:0;border-bottom:1px solid #000;display:grid;grid-template-columns:70px 1fr;gap:10px;page-break-inside:avoid;padding:6px 0}
+  .shot{aspect-ratio:3/4}
+  .ledger{display:grid !important}
+  *{color:#000 !important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <h1 class="brand disp">The <em>Shelf</em></h1>
+    <div class="tools">
+      <span class="count mono" id="countLbl">0</span>
+      <button class="iconbtn" id="themeBtn" title="Light or dark">◐</button>
+      <button class="iconbtn" id="menuBtn" title="Backup and restore">⋯</button>
+    </div>
+  </div>
+  <input id="search" type="text" placeholder="Search name, house, or the original" autocomplete="off">
+  <div class="chips" id="chips"></div>
+</header>
+
+<div class="ledger">
+  <div><span class="v" id="stBottles">0</span><span class="k">Bottles</span></div>
+  <div><span class="v" id="stPaid">$0</span><span class="k">Paid</span></div>
+  <div><span class="v" id="stRetail">$0</span><span class="k">Retail</span></div>
+  <div><span class="v" id="stSaved">$0</span><span class="k">Saved</span></div>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="empty" id="empty" style="display:none">
+  <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
+  <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
+</div>
+
+<button class="pickme" id="pickBtn">Pick one</button>
+<button class="fab" id="addBtn" aria-label="Add a bottle">+</button>
+<div class="toast" id="toast"></div>
+
+<!-- detail -->
+<section class="sheet" id="detail" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="dClose">Back</button>
+    <button class="btn" id="dEdit">Edit</button>
+  </div>
+  <div class="sheetbody" id="dBody"></div>
+</section>
+
+<!-- editor -->
+<section class="sheet" id="editor" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="eCancel">Cancel</button>
+    <strong class="lbl" id="eTitle">New bottle</strong>
+    <button class="btn solid" id="eSave">Save</button>
+  </div>
+  <div class="sheetbody">
+    <div class="field">
+      <label>Photo</label>
+      <div class="photobox">
+        <img id="ePreview" alt="" style="display:none">
+        <button class="btn" id="ePhotoBtn">Add photo</button>
+        <button class="btn warn" id="ePhotoClear" style="display:none">Remove</button>
+      </div>
+      <input type="file" id="ePhoto" accept="image/*">
+    </div>
+    <div class="field"><label>Name</label><input type="text" id="eName" list="nameList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="nameList"></datalist></div>
+    <div class="field"><label>House</label><input type="text" id="eHouse" list="houseList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="houseList"></datalist></div>
+    <div class="field">
+      <label>What is it</label>
+      <select id="eKind">
+        <option value="original">The original</option>
+        <option value="dupe">A copy of something</option>
+      </select>
+    </div>
+    <div class="field" id="eCloneWrap" style="display:none">
+      <label>Copy of</label><input type="text" id="eClone" list="originalList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="originalList"></datalist>
+      <p class="lbl" style="margin:6px 0 0;font-weight:400;letter-spacing:.04em;text-transform:none">Picking a known one fills in its retail price. Edit it if yours differs.</p>
+    </div>
+    <div class="two">
+      <div class="field"><label>Paid</label><input type="number" id="ePaid" inputmode="decimal" placeholder="35"></div>
+      <div class="field"><label>Original retail</label><input type="number" id="eRetail" inputmode="decimal" placeholder="435"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Size ml</label><input type="number" id="eSize" inputmode="numeric" placeholder="100"></div>
+      <div class="field"><label>Rating 1 to 5</label><input type="number" id="eRating" min="0" max="5" inputmode="numeric" placeholder="4"></div>
+    </div>
+    <div class="field">
+      <label>Seasons</label>
+      <div class="pickers" id="eSeasons"></div>
+    </div>
+    <div class="field">
+      <label>When you reach for it</label>
+      <div class="pickers" id="eVibes"></div>
+    </div>
+    <div class="field">
+      <label>Bottle left <span class="mono" id="eFillVal">100%</span></label>
+      <input type="range" id="eFill" min="0" max="100" step="5" value="100">
+    </div>
+    <div class="field"><label>Notes</label><textarea id="eNotes" placeholder="Smoky pineapple. Lasts about six hours on skin. Two sprays is plenty."></textarea></div>
+    <div class="actions">
+      <button class="btn warn wide" id="eDelete" style="display:none">Delete this bottle</button>
+    </div>
+  </div>
+</section>
+
+<!-- menu -->
+<section class="sheet" id="menu" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="mClose">Back</button>
+    <strong class="lbl">Backup</strong>
+    <span></span>
+  </div>
+  <div class="sheetbody">
+    <p>Your shelf lives on this device only. Export a file before you switch phones or clear your browser.</p>
+    <div class="actions">
+      <button class="btn wide solid" id="mExport">Export a backup file</button>
+      <button class="btn wide" id="mImport">Restore from a backup file</button>
+      <button class="btn wide" id="mPrint">Print the shelf list</button>
+    </div>
+    <input type="file" id="mFile" accept="application/json">
+    <p class="lbl" style="margin-top:24px">Add to home screen</p>
+    <p>iPhone, open in Safari, tap Share, then Add to Home Screen. Android, open in Chrome, tap the menu, then Add to Home screen. It then opens like an app.</p>
+  </div>
+</section>
+
+<script>
+/* ---------------- storage ---------------- */
+const KEY='shelf-v1';
+const store={
+  async get(){
+    try{
+      if(window.storage&&window.storage.get){
+        const r=await window.storage.get(KEY);
+        return r&&r.value?JSON.parse(r.value):null;
+      }
+    }catch(e){}
+    try{const raw=localStorage.getItem(KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+  },
+  async set(data){
+    const s=JSON.stringify(data);
+    try{
+      if(window.storage&&window.storage.set){await window.storage.set(KEY,s);return true;}
+    }catch(e){}
+    try{localStorage.setItem(KEY,s);return true;}catch(e){toast('Storage is full. Export a backup.');return false;}
+  }
+};
+
+/* ---------------- state ---------------- */
+/* ---------------- catalog ----------------
+   ORIGINALS: name, house, rough US list price for a full bottle.
+   Prices are a starting point only. Edit any of them per bottle. */
+const ORIGINALS=[
+['Aventus','Creed',495],['Green Irish Tweed','Creed',445],['Silver Mountain Water','Creed',425],
+['Virgin Island Water','Creed',425],['Royal Oud','Creed',555],['Aventus Cologne','Creed',415],
+['Sauvage EDT','Dior',125],['Sauvage Elixir','Dior',220],['Homme Intense','Dior',150],
+['Fahrenheit','Dior',135],['Homme 2020','Dior',130],['Bois d Argent','Dior',300],
+['Bleu de Chanel EDP','Chanel',150],['Allure Homme Sport','Chanel',125],['Egoiste','Chanel',130],
+['Coco Mademoiselle','Chanel',160],['Chance','Chanel',150],
+['Tobacco Vanille','Tom Ford',450],['Oud Wood','Tom Ford',400],['Tuscan Leather','Tom Ford',450],
+['Noir Extreme','Tom Ford',210],['Ombre Leather','Tom Ford',200],['Lost Cherry','Tom Ford',450],
+['Bitter Peach','Tom Ford',450],['Neroli Portofino','Tom Ford',400],['Black Orchid','Tom Ford',200],
+['Baccarat Rouge 540','Maison Francis Kurkdjian',325],['Baccarat Rouge 540 Extrait','Maison Francis Kurkdjian',495],
+['Grand Soir','Maison Francis Kurkdjian',300],['Oud Satin Mood','Maison Francis Kurkdjian',400],
+['Angels Share','Kilian',295],['Black Phantom','Kilian',295],['Straight to Heaven','Kilian',295],
+['Layton','Parfums de Marly',355],['Herod','Parfums de Marly',355],['Pegasus','Parfums de Marly',355],
+['Percival','Parfums de Marly',355],['Delina','Parfums de Marly',355],['Godolphin','Parfums de Marly',355],
+['Oud for Greatness','Initio',395],['Side Effect','Initio',395],['Rehab','Initio',395],
+['Naxos','Xerjoff',380],['Erba Pura','Xerjoff',320],['Alexandria II','Xerjoff',600],
+['Interlude Man','Amouage',375],['Reflection Man','Amouage',375],
+['La Nuit de L Homme','Yves Saint Laurent',135],['Y EDP','Yves Saint Laurent',135],['MYSLF','Yves Saint Laurent',140],
+['1 Million','Paco Rabanne',130],['Invictus','Paco Rabanne',125],['Phantom','Paco Rabanne',125],
+['Eros','Versace',115],['Dylan Blue','Versace',115],['Eros Flame','Versace',125],
+['Acqua di Gio Profumo','Giorgio Armani',135],['Code','Giorgio Armani',115],['Stronger With You','Giorgio Armani',115],
+['Le Male','Jean Paul Gaultier',105],['Le Male Le Parfum','Jean Paul Gaultier',135],['Ultra Male','Jean Paul Gaultier',120],
+['Luna Rossa Carbon','Prada',120],['L Homme','Prada',125],
+['Born in Roma Uomo','Valentino',135],['The Most Wanted','Azzaro',125],['Wanted','Azzaro',115],
+['Explorer','Montblanc',115],['Legend','Montblanc',105],
+['Angel Men','Mugler',105],['Spicebomb Extreme','Viktor and Rolf',135],
+['Bottled','Hugo Boss',105],['Voyage','Nautica',35],['Polo Blue','Ralph Lauren',115],
+['The One','Dolce and Gabbana',115],['K','Dolce and Gabbana',115],['Light Blue','Dolce and Gabbana',110],
+['Guilty','Gucci',115],['Gentleman EDP','Givenchy',125],['Hero','Burberry',135],
+['Bad Boy','Carolina Herrera',125],['Man in Black','Bvlgari',115],
+['Santal 33','Le Labo',230],['Another 13','Le Labo',230],
+['Gypsy Water','Byredo',230],['Bal d Afrique','Byredo',230],
+['Jazz Club','Maison Margiela',165],['By the Fireplace','Maison Margiela',165],
+['Hacivat','Nishane',300],['Ani','Nishane',300],
+['Elysium','Roja Parfums',400],['Enigma','Roja Parfums',500],
+['Cedrat Boise','Mancera',165],['Intense Cafe','Montale',160],
+['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130]
+];
+const CLONES=[
+['Club de Nuit Intense Man','Armaf'],['Club de Nuit Sillage','Armaf'],['Club de Nuit Untold','Armaf'],
+['Club de Nuit Milestone','Armaf'],['Tres Nuit','Armaf'],['Ventana','Armaf'],['Derby Club House','Armaf'],
+['Bucephalus','Armaf'],
+['Khamrah','Lattafa'],['Khamrah Qahwa','Lattafa'],['Asad','Lattafa'],['Asad Zanzibar','Lattafa'],
+['Fakhar','Lattafa'],['Fakhar Black','Lattafa'],['Yara','Lattafa'],['Yara Moi','Lattafa'],
+['Ansaam Gold','Lattafa'],['Qaed Al Fursan','Lattafa'],['Qaed Al Fursan Unlimited','Lattafa'],
+['Ana Abiyedh Rouge','Lattafa'],['Raghba','Lattafa'],['Badee Al Oud','Lattafa'],['Eclaire','Lattafa'],
+['Oud Mood','Lattafa'],['Bade e Al Oud Amethyst','Lattafa'],['Ameer Al Oudh','Lattafa'],
+['Jean Lowe Ombre','Maison Alhambra'],['Jean Lowe Noir','Maison Alhambra'],['Philos Jade','Maison Alhambra'],
+['Salvo','Maison Alhambra'],['Bermuda Bay','Maison Alhambra'],['Le Cordon','Maison Alhambra'],
+['Hawas','Rasasi'],['Hawas Ice','Rasasi'],['Hawas Fire','Rasasi'],['La Yuqawam','Rasasi'],['Daarej','Rasasi'],
+['9PM','Afnan'],['9AM','Afnan'],['Supremacy Not Only Intense','Afnan'],['Supremacy Silver','Afnan'],
+['Turathi Blue','Afnan'],['Rare Carbon','Afnan'],
+['Amber Oud Gold','Al Haramain'],['Amber Oud Carbon','Al Haramain'],['L Aventure','Al Haramain'],
+['L Aventure Knight','Al Haramain'],['Detour Noir','Al Haramain'],
+['Shaghaf Oud','Swiss Arabian'],['Layali','Swiss Arabian'],['Casablanca','Swiss Arabian'],
+['Royal Amber','Orientica'],['Velvet Gold','Orientica'],['Amber Rouge','Orientica'],['Fabulous Oud','Orientica'],
+['King','Bharara'],['Bianco Latte','Giardini di Toscana'],['Hayaati','Khadlaj'],['Oud Al Layl','Zimaya'],
+['Sultan Malik','Zimaya'],['Ophylia','Nusuk'],['Blue Nectar','Fragrance World'],
+['Mousuf','Paris Corner'],['Emir Cafe Rouge','Paris Corner']
+];
+const HOUSES=[
+'Abercrombie and Fitch','Acqua di Parma','Afnan','Ajmal','Al Haramain','Alexandria Fragrances','ALT Fragrances',
+'Amouage','Aramis','Ard Al Zaafaran','Armaf','Azzaro','Bharara','Bond No 9','Burberry','Bvlgari',
+'Byredo','Calvin Klein','Carolina Herrera','Cartier','Chanel','Chopard','Clive Christian','Coach',
+'Comme des Garcons','Creed','Davidoff','Diptyque','Dior','Dolce and Gabbana','Dossier','Dua Fragrances',
+'Emper','Escentric Molecules','Etat Libre d Orange','Ferrari','Fragrance World','Frederic Malle','French Avenue','Giardini di Toscana',
+'Givenchy','Grandeur Elite','Gucci','Guerlain','Hermes','Histoires de Parfums','Hugo Boss','Initio',
+'Issey Miyake','Jean Paul Gaultier','Jimmy Choo','John Varvatos','Juliette Has a Gun','Kenzo','Khadlaj',
+'Kilian','L Artisan Parfumeur','Lacoste','Lancome','Lattafa','Le Labo','Maison Alhambra',
+'Maison Francis Kurkdjian','Maison Margiela','Mancera','Memo Paris','Michael Kors','Montagne Parfums',
+'Montale','Montblanc','Moschino','Mugler','My Perfumes','Nasomatto','Nautica','Nishane','Nusuk','Oakcha',
+'Orientica','Ormonde Jayne','Orto Parisi','Paco Rabanne','Paris Corner','Parfums de Marly','Penhaligons',
+'Porsche Design','Prada','Ralph Lauren','Rasasi','Riiffs','Roja Parfums','Salvatore Ferragamo',
+'Serge Lutens','Swiss Arabian','Tiziana Terenzi','Tom Ford','Tommy Hilfiger','Valentino','Van Cleef and Arpels',
+'Versace','Viktor and Rolf','Xerjoff','Yves Saint Laurent','Zara','Zegna','Zimaya'
+];
+const FULL=o=>o[1]+' '+o[0];
+const RETAIL={};ORIGINALS.forEach(o=>{RETAIL[FULL(o).toLowerCase()]=o[2];});
+const HOUSEOF={};ORIGINALS.concat(CLONES).forEach(o=>{HOUSEOF[FULL(o).toLowerCase()]=o[1];});
+function fillList(id,arr){
+  const dl=document.getElementById(id);dl.innerHTML='';
+  arr.slice().sort().forEach(v=>{const o=document.createElement('option');o.value=v;dl.appendChild(o);});
+}
+function buildLists(){
+  const owned=items.map(i=>i.house).filter(Boolean);
+  fillList('houseList',[...new Set(HOUSES.concat(owned))]);
+  fillList('originalList',ORIGINALS.map(FULL));
+  fillList('nameList',ORIGINALS.map(FULL).concat(CLONES.map(FULL)));
+}
+
+const SEASONS=['Spring','Summer','Fall','Winter'];
+const ABBR={Spring:'SP',Summer:'SU',Fall:'FA',Winter:'WI'};
+const VIBES=['Office','Night','Date','Casual','Dressy','Travel'];
+let items=[];
+let filter={q:'',season:'',vibe:'',kind:''};
+let editingId=null;
+let pendingPhoto=null;
+
+/* ---------------- helpers ---------------- */
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(Math.round(Number(n)||0)).toLocaleString();
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function currentSeason(){
+  const m=new Date().getMonth();
+  if(m<=1||m===11)return 'Winter';
+  if(m<=4)return 'Spring';
+  if(m<=7)return 'Summer';
+  return 'Fall';
+}
+let toastTimer;
+function toast(msg){
+  const t=$('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ---------------- theme ---------------- */
+function setTheme(mode){
+  document.documentElement.setAttribute('data-theme',mode);
+  document.querySelector('meta[name=theme-color]').setAttribute('content',mode==='dark'?'#0C1416':'#E7ECEA');
+  try{localStorage.setItem('shelf-theme',mode);}catch(e){}
+}
+setTheme('light');
+$('themeBtn').onclick=()=>{
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+};
+let printPrev='light';
+window.addEventListener('beforeprint',()=>{printPrev=document.documentElement.getAttribute('data-theme');setTheme('light');});
+window.addEventListener('afterprint',()=>setTheme(printPrev));
+
+/* ---------------- chips ---------------- */
+function buildChips(){
+  const c=$('chips');c.innerHTML='';
+  const mk=(label,type,val)=>{
+    const b=document.createElement('button');
+    b.className='chip';b.textContent=label;
+    b.setAttribute('aria-pressed',filter[type]===val);
+    b.onclick=()=>{filter[type]=filter[type]===val?'':val;buildChips();render();};
+    c.appendChild(b);
+  };
+  SEASONS.forEach(s=>mk(s,'season',s));
+  mk('Copies','kind','dupe');
+  mk('Originals','kind','original');
+  VIBES.forEach(v=>mk(v,'vibe',v));
+}
+
+/* ---------------- render ---------------- */
+function visible(){
+  const q=filter.q.trim().toLowerCase();
+  return items.filter(it=>{
+    if(filter.season&&!(it.seasons||[]).includes(filter.season))return false;
+    if(filter.vibe&&!(it.vibes||[]).includes(filter.vibe))return false;
+    if(filter.kind&&it.kind!==filter.kind)return false;
+    if(q){
+      const hay=[it.name,it.house,it.cloneOf,it.notes].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+}
+function render(){
+  const list=visible();
+  const g=$('grid');g.innerHTML='';
+  $('empty').style.display=items.length?'none':'block';
+  $('countLbl').textContent=items.length;
+  list.forEach(it=>{
+    const card=document.createElement('article');
+    card.className='card';card.tabIndex=0;
+    const dial=SEASONS.map(s=>`<b class="${(it.seasons||[]).includes(s)?'on':''}">${ABBR[s]}</b>`).join('');
+    const img=it.photo?`<img src="${it.photo}" alt="${it.name}">`:`<div class="noshot">No photo</div>`;
+    card.innerHTML=`
+      <div class="shot">
+        ${img}
+        ${it.kind==='dupe'?'<span class="dupeflag">Copy</span>':''}
+        <div class="fill"><i style="height:${it.fill==null?100:it.fill}%"></i></div>
+      </div>
+      <div class="meta">
+        <div class="cname">${esc(it.name||'Untitled')}</div>
+        <div class="chouse">${esc(it.house||'')}${it.kind==='dupe'&&it.cloneOf?' / of '+esc(it.cloneOf):''}</div>
+        <div class="dial">${dial}</div>
+      </div>`;
+    card.onclick=()=>openDetail(it.id);
+    card.onkeydown=e=>{if(e.key==='Enter')openDetail(it.id);};
+    g.appendChild(card);
+  });
+  const paid=items.reduce((a,b)=>a+(Number(b.paid)||0),0);
+  const retail=items.reduce((a,b)=>a+(Number(b.retail)||Number(b.paid)||0),0);
+  $('stBottles').textContent=items.length;
+  $('stPaid').textContent=money(paid);
+  $('stRetail').textContent=money(retail);
+  $('stSaved').textContent=money(Math.max(0,retail-paid));
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------------- detail ---------------- */
+function openDetail(id){
+  const it=items.find(x=>x.id===id);if(!it)return;
+  editingId=id;
+  const saved=(Number(it.retail)||0)-(Number(it.paid)||0);
+  const row=(k,v,txt)=>v?`<div class="row"><span class="k">${k}</span><span class="v ${txt?'txt':''}">${esc(v)}</span></div>`:'';
+  $('dBody').innerHTML=`
+    ${it.photo?`<img class="hero" src="${it.photo}" alt="${esc(it.name)}">`:''}
+    <h2 class="dname disp">${esc(it.name||'Untitled')}</h2>
+    <div class="dhouse">${esc(it.house||'')}</div>
+    <div class="dial" style="margin-top:12px">${SEASONS.map(s=>`<b class="${(it.seasons||[]).includes(s)?'on':''}">${ABBR[s]}</b>`).join('')}</div>
+    <div class="rows">
+      ${it.kind==='dupe'?row('Copy of',it.cloneOf||'not noted',true):row('Status','The original',true)}
+      ${row('Paid',money(it.paid))}
+      ${it.kind==='dupe'&&saved>0?row('Under retail',money(saved)+'  ('+Math.round((1-(it.paid/it.retail))*100)+'% off)'):''}
+      ${row('Retail',it.retail?money(it.retail):'')}
+      ${row('Size',it.size?it.size+' ml':'')}
+      ${row('Cost per ml',it.paid&&it.size?'$'+(it.paid/it.size).toFixed(2):'')}
+      ${row('Rating',it.rating?'★'.repeat(it.rating)+'☆'.repeat(5-it.rating):'',true)}
+      ${row('Reach for it',(it.vibes||[]).join(', '),true)}
+      ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
+      ${row('Last worn',it.lastWorn?new Date(it.lastWorn).toLocaleDateString():'never',true)}
+      ${row('Times worn',it.wears||0)}
+      ${it.notes?`<div class="row" style="display:block"><span class="k">Notes</span><p style="margin:8px 0 0">${esc(it.notes)}</p></div>`:''}
+    </div>
+    <div class="actions">
+      <button class="btn solid wide" id="dWore">Wearing it today</button>
+    </div>`;
+  $('dWore').onclick=async()=>{
+    it.lastWorn=Date.now();it.wears=(it.wears||0)+1;
+    if(it.fill!=null&&it.fill>0)it.fill=Math.max(0,it.fill-1);
+    await save();openDetail(id);toast('Logged');
+  };
+  show('detail');
+}
+$('dClose').onclick=()=>hide('detail');
+$('dEdit').onclick=()=>openEditor(editingId);
+
+/* ---------------- editor ---------------- */
+function pickerRow(el,options,selected){
+  el.innerHTML='';
+  options.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='pick';b.textContent=o;b.type='button';
+    b.setAttribute('aria-pressed',selected.includes(o));
+    b.onclick=()=>b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');
+    el.appendChild(b);
+  });
+}
+function readPicker(el){
+  return [...el.querySelectorAll('.pick')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.textContent);
+}
+function openEditor(id){
+  const it=id?items.find(x=>x.id===id):null;
+  editingId=id||null;
+  pendingPhoto=it?it.photo||null:null;
+  $('eTitle').textContent=it?'Edit bottle':'New bottle';
+  $('eName').value=it?it.name||'':'';
+  $('eHouse').value=it?it.house||'':'';
+  $('eKind').value=it?it.kind||'original':'original';
+  $('eClone').value=it?it.cloneOf||'':'';
+  $('ePaid').value=it&&it.paid!=null?it.paid:'';
+  $('eRetail').value=it&&it.retail!=null?it.retail:'';
+  $('eSize').value=it&&it.size!=null?it.size:'';
+  $('eRating').value=it&&it.rating!=null?it.rating:'';
+  $('eNotes').value=it?it.notes||'':'';
+  $('eFill').value=it&&it.fill!=null?it.fill:100;
+  $('eFillVal').textContent=$('eFill').value+'%';
+  pickerRow($('eSeasons'),SEASONS,it?it.seasons||[]:[]);
+  pickerRow($('eVibes'),VIBES,it?it.vibes||[]:[]);
+  $('eCloneWrap').style.display=$('eKind').value==='dupe'?'block':'none';
+  $('eDelete').style.display=it?'block':'none';
+  paintPreview();
+  hide('detail');show('editor');
+}
+function paintPreview(){
+  const p=$('ePreview');
+  if(pendingPhoto){p.src=pendingPhoto;p.style.display='block';$('ePhotoClear').style.display='block';$('ePhotoBtn').textContent='Replace photo';}
+  else{p.style.display='none';$('ePhotoClear').style.display='none';$('ePhotoBtn').textContent='Add photo';}
+}
+$('eKind').onchange=()=>{$('eCloneWrap').style.display=$('eKind').value==='dupe'?'block':'none';};
+function matched(v){const k=(v||'').trim().toLowerCase();return HOUSEOF[k]?k:null;}
+$('eName').onchange=()=>{
+  const k=matched($('eName').value);if(!k)return;
+  const house=HOUSEOF[k];
+  if(!$('eHouse').value.trim())$('eHouse').value=house;
+  if($('eHouse').value.trim().toLowerCase()===house.toLowerCase())
+    $('eName').value=$('eName').value.trim().slice(house.length).trim();
+  if(!RETAIL[k]&&$('eKind').value==='original'){
+    $('eKind').value='dupe';$('eCloneWrap').style.display='block';
+  }
+  if($('eKind').value==='original'&&$('eRetail').value===''&&RETAIL[k])$('eRetail').value=RETAIL[k];
+};
+$('eClone').onchange=()=>{
+  const k=matched($('eClone').value);if(!k)return;
+  if($('eRetail').value===''&&RETAIL[k])$('eRetail').value=RETAIL[k];
+};
+$('eFill').oninput=()=>{$('eFillVal').textContent=$('eFill').value+'%';};
+$('ePhotoBtn').onclick=()=>$('ePhoto').click();
+$('ePhotoClear').onclick=()=>{pendingPhoto=null;$('ePhoto').value='';paintPreview();};
+$('ePhoto').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=720;
+      let w=img.width,h=img.height;
+      if(w>h&&w>max){h=Math.round(h*max/w);w=max;}
+      else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      pendingPhoto=c.toDataURL('image/jpeg',0.72);
+      paintPreview();
+    };
+    img.src=fr.result;
+  };
+  fr.readAsDataURL(f);
+};
+$('eCancel').onclick=()=>{hide('editor');};
+$('eSave').onclick=async()=>{
+  const name=$('eName').value.trim();
+  if(!name){toast('Give it a name');return;}
+  const rec={
+    id:editingId||uid(),
+    name,
+    house:$('eHouse').value.trim(),
+    kind:$('eKind').value,
+    cloneOf:$('eKind').value==='dupe'?$('eClone').value.trim():'',
+    paid:$('ePaid').value===''?null:Number($('ePaid').value),
+    retail:$('eRetail').value===''?null:Number($('eRetail').value),
+    size:$('eSize').value===''?null:Number($('eSize').value),
+    rating:$('eRating').value===''?null:Math.max(0,Math.min(5,Number($('eRating').value))),
+    seasons:readPicker($('eSeasons')),
+    vibes:readPicker($('eVibes')),
+    fill:Number($('eFill').value),
+    notes:$('eNotes').value.trim(),
+    photo:pendingPhoto
+  };
+  const old=items.find(x=>x.id===rec.id);
+  if(old){rec.lastWorn=old.lastWorn;rec.wears=old.wears;Object.assign(old,rec);}
+  else{rec.wears=0;rec.lastWorn=null;items.unshift(rec);}
+  await save();hide('editor');buildLists();render();toast('Saved');
+};
+$('eDelete').onclick=async()=>{
+  if(!editingId)return;
+  if(!confirm('Delete this bottle from the shelf'))return;
+  items=items.filter(x=>x.id!==editingId);
+  await save();hide('editor');hide('detail');render();toast('Deleted');
+};
+
+/* ---------------- pick one ---------------- */
+$('pickBtn').onclick=()=>{
+  const s=currentSeason();
+  let pool=items.filter(it=>(it.seasons||[]).includes(s)&&(it.fill==null||it.fill>0));
+  if(!pool.length)pool=items.slice();
+  if(!pool.length){toast('Add a bottle first');return;}
+  pool.sort((a,b)=>(a.lastWorn||0)-(b.lastWorn||0));
+  const shortlist=pool.slice(0,Math.max(3,Math.ceil(pool.length/2)));
+  const choice=shortlist[Math.floor(Math.random()*shortlist.length)];
+  openDetail(choice.id);
+  toast(s+' pick');
+};
+
+/* ---------------- sheets ---------------- */
+function show(id){$(id).classList.add('open');$(id).setAttribute('aria-hidden','false');document.body.style.overflow='hidden';$(id).scrollTop=0;}
+function hide(id){$(id).classList.remove('open');$(id).setAttribute('aria-hidden','true');if(!document.querySelector('.sheet.open'))document.body.style.overflow='';}
+$('addBtn').onclick=()=>openEditor(null);
+$('menuBtn').onclick=()=>show('menu');
+$('mClose').onclick=()=>hide('menu');
+$('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
+$('mExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+};
+$('mImport').onclick=()=>$('mFile').click();
+$('mFile').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=async()=>{
+    try{
+      const d=JSON.parse(fr.result);
+      if(!d.items)throw 0;
+      items=d.items;await save();render();hide('menu');toast('Restored');
+    }catch(err){toast('That file did not read');}
+  };
+  fr.readAsText(f);
+};
+$('search').oninput=e=>{filter.q=e.target.value;render();};
+
+/* ---------------- boot ---------------- */
+async function save(){return store.set({app:'shelf',version:1,items});}
+(async function init(){
+  try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
+  const data=await store.get();
+  items=(data&&data.items)||[];
+  buildChips();buildLists();render();
+})();
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){const open=document.querySelector('.sheet.open');if(open)hide(open.id);}
+});
+</script>
+</body>
+</html>
