@@ -50,6 +50,14 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 .disp{font-family:"Bodoni Moda",Georgia,serif;font-weight:600;letter-spacing:-.01em}
 .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:700}
 
+/* ---------- backup bar ---------- */
+#bkBar{display:none;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--panel);border-bottom:1px solid var(--line);color:var(--ink)}
+#bkBar.on{display:flex}
+#bkBar span{flex:1;font-size:14px}
+#bkBar button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
+#bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+@media print{#bkBar{display:none!important}}
 /* ---------- header ---------- */
 header{
   position:sticky;top:0;z-index:40;background:var(--glass);
@@ -219,6 +227,7 @@ input[type=file]{display:none}
   <input id="search" type="text" placeholder="Search name, house, or the original" autocomplete="off">
   <div class="chips" id="chips"></div>
 </header>
+<div id="bkBar"><span id="bkMsg"></span><button class="go" id="bkNow">Back up</button><button id="bkLater">Later</button></div>
 
 <div class="ledger">
   <div><span class="v" id="stBottles">0</span><span class="k">Bottles</span></div>
@@ -311,9 +320,11 @@ input[type=file]{display:none}
     <span></span>
   </div>
   <div class="sheetbody">
-    <p>Your shelf lives on this device only. Export a file before you switch phones or clear your browser.</p>
+    <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
+    <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
     <div class="actions">
-      <button class="btn wide solid" id="mExport">Export a backup file</button>
+      <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
+      <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
     </div>
@@ -386,7 +397,10 @@ const ORIGINALS=[
 ['Hacivat','Nishane',300],['Ani','Nishane',300],
 ['Elysium','Roja Parfums',400],['Enigma','Roja Parfums',500],
 ['Cedrat Boise','Mancera',165],['Intense Cafe','Montale',160],
-['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130]
+['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130],
+['Bianco Latte','Giardini di Toscana',155],
+['Imagination','Louis Vuitton',320],['Paradigme','Prada',140],
+['Bleu de Chanel L Exclusif','Chanel',275],['Euphoria Men','Calvin Klein',100]
 ];
 const CLONES=[
 ['Club de Nuit Intense Man','Armaf'],['Club de Nuit Sillage','Armaf'],['Club de Nuit Untold','Armaf'],
@@ -406,8 +420,12 @@ const CLONES=[
 ['L Aventure Knight','Al Haramain'],['Detour Noir','Al Haramain'],
 ['Shaghaf Oud','Swiss Arabian'],['Layali','Swiss Arabian'],['Casablanca','Swiss Arabian'],
 ['Royal Amber','Orientica'],['Velvet Gold','Orientica'],['Amber Rouge','Orientica'],['Fabulous Oud','Orientica'],
-['King','Bharara'],['Bianco Latte','Giardini di Toscana'],['Hayaati','Khadlaj'],['Oud Al Layl','Zimaya'],
-['Sultan Malik','Zimaya'],['Ophylia','Nusuk'],['Blue Nectar','Fragrance World'],
+['King','Bharara'],['Hayaati','Khadlaj'],['Oud Al Layl','Zimaya'],
+['Sultan Malik','Zimaya'],['Ophylia','Nusuk'],
+['Ineffable','Oakcha'],['Melting Embers','Oakcha'],
+['Caribbean Waters','The Dua Brand'],['Imagine','The Dua Brand'],
+['Nocturno Elixir','Rayhaan'],['Woody Sandalwood','Dossier'],
+['Royalty','Sentiment'],['Intoxicate Mystique','La Fede'],['Blue Nectar','Fragrance World'],
 ['Mousuf','Paris Corner'],['Emir Cafe Rouge','Paris Corner']
 ];
 const HOUSES=[
@@ -421,6 +439,7 @@ const HOUSES=[
 'Kilian','L Artisan Parfumeur','Lacoste','Lancome','Lattafa','Le Labo','Maison Alhambra',
 'Maison Francis Kurkdjian','Maison Margiela','Mancera','Memo Paris','Michael Kors','Montagne Parfums',
 'Montale','Montblanc','Moschino','Mugler','My Perfumes','Nasomatto','Nautica','Nishane','Nusuk','Oakcha',
+'La Fede','Rayhaan','Sentiment','The Dua Brand',
 'Orientica','Ormonde Jayne','Orto Parisi','Paco Rabanne','Paris Corner','Parfums de Marly','Penhaligons',
 'Porsche Design','Prada','Ralph Lauren','Rasasi','Riiffs','Roja Parfums','Salvatore Ferragamo',
 'Serge Lutens','Swiss Arabian','Tiziana Terenzi','Tom Ford','Tommy Hilfiger','Valentino','Van Cleef and Arpels',
@@ -439,6 +458,91 @@ function buildLists(){
   fillList('originalList',ORIGINALS.map(FULL));
   fillList('nameList',ORIGINALS.map(FULL).concat(CLONES.map(FULL)));
 }
+
+/* PROFILES: accords, seasons, occasions, and for clones the original it is
+   usually compared to. Everything here is a starting point you can edit. */
+const PROF={
+'creed aventus':['Pineapple, bergamot, blackcurrant, birch, smoky oakmoss, musk','SP SU FA','Office Night Date Dressy'],
+'creed green irish tweed':['Lemon, violet leaf, iris, sandalwood, ambergris','SP SU','Office Dressy Casual'],
+'creed silver mountain water':['Bergamot, green tea, blackcurrant, sandalwood, musk','SP SU','Office Casual Travel'],
+'creed virgin island water':['Lime, coconut, white rum, ginger, sugar cane','SU','Casual Travel'],
+'dior sauvage edt':['Bergamot, pepper, lavender, ambroxan, cedar','SP SU FA','Office Casual Date'],
+'dior sauvage elixir':['Grapefruit, cinnamon, nutmeg, lavender, licorice, amber','FA WI','Night Date Dressy'],
+'dior homme intense':['Iris, lavender, pear, ambrette, vetiver, vanilla','FA WI','Dressy Office Date'],
+'dior fahrenheit':['Violet leaf, gasoline accord, leather, nutmeg, cedar','FA WI','Night Dressy'],
+'chanel bleu de chanel edp':['Grapefruit, mint, pink pepper, ginger, incense, cedar','SP SU FA WI','Office Date Dressy'],
+'chanel allure homme sport':['Orange, aldehydes, pepper, cedar, tonka, vanilla','SP SU','Office Casual Travel'],
+'tom ford tobacco vanille':['Tobacco leaf, vanilla, cocoa, dried fruit, tonka, spice','FA WI','Night Dressy Date'],
+'tom ford oud wood':['Oud, rosewood, cardamom, sandalwood, vanilla, amber','FA WI','Dressy Night Office'],
+'tom ford tuscan leather':['Raspberry, saffron, leather, suede, birch tar','FA WI','Night Dressy'],
+'tom ford noir extreme':['Cardamom, saffron, kulfi, amber, sandalwood, vanilla','FA WI','Night Date Dressy'],
+'tom ford ombre leather':['Leather, cardamom, jasmine, amber, moss','FA WI','Night Casual Dressy'],
+'tom ford lost cherry':['Black cherry, bitter almond, liqueur, tonka, sandalwood','FA WI','Night Date'],
+'tom ford bitter peach':['Peach, blood orange, rum, cardamom, sandalwood, vanilla','SU FA','Night Date'],
+'maison francis kurkdjian baccarat rouge 540':['Saffron, jasmine, amberwood, cedar, sweet resin','FA WI SP','Night Dressy Date'],
+'maison francis kurkdjian grand soir':['Amber, benzoin, tonka, vanilla, labdanum','FA WI','Night Dressy'],
+'kilian angels share':['Cognac, cinnamon, tonka, praline, oak, vanilla','FA WI','Night Date Dressy'],
+'parfums de marly layton':['Apple, bergamot, lavender, geranium, vanilla, sandalwood','FA WI SP','Office Night Dressy Date'],
+'parfums de marly herod':['Cinnamon, pepper, tobacco leaf, vetiver, vanilla','FA WI','Night Dressy'],
+'parfums de marly pegasus':['Bitter almond, heliotrope, jasmine, vanilla, sandalwood','FA WI SP','Office Date Dressy'],
+'initio oud for greatness':['Oud, saffron, nutmeg, lavender, patchouli, musk','FA WI','Night Dressy'],
+'xerjoff naxos':['Bergamot, lavender, honey, tobacco, tonka, cinnamon','FA WI','Dressy Night Date'],
+'xerjoff erba pura':['Orange, lemon, tropical fruit, vanilla, musk, amber','SP SU','Casual Date Travel'],
+'amouage interlude man':['Oregano, pepper, incense, myrrh, leather, opoponax','FA WI','Night Dressy'],
+'yves saint laurent la nuit de l homme':['Cardamom, lavender, cedar, cumin, vetiver, coumarin','FA WI SP','Night Date Dressy'],
+'yves saint laurent y edp':['Apple, ginger, sage, juniper, amberwood, tonka','SP SU FA','Office Casual Date'],
+'paco rabanne 1 million':['Grapefruit, mint, cinnamon, rose, leather, amber','FA WI','Night Casual'],
+'paco rabanne invictus':['Grapefruit, marine accord, bay leaf, ambergris, guaiac','SP SU','Casual Travel Office'],
+'versace eros':['Mint, green apple, tonka, vanilla, cedar, vetiver','SP FA WI','Night Casual Date'],
+'versace dylan blue':['Bergamot, grapefruit, violet leaf, papyrus, musk','SP SU','Office Casual Travel'],
+'giorgio armani acqua di gio profumo':['Bergamot, sea notes, geranium, patchouli, incense','SP SU FA','Office Dressy Date'],
+'jean paul gaultier le male':['Mint, lavender, cinnamon, vanilla, tonka','FA WI','Casual Night'],
+'jean paul gaultier le male le parfum':['Cardamom, lavender, vanilla, benzoin, woods','FA WI','Night Date Dressy'],
+'prada luna rossa carbon':['Bergamot, lavender, pepper, coal accord, ambroxan, patchouli','FA WI SP','Office Casual Night'],
+'viktor and rolf spicebomb extreme':['Black pepper, cinnamon, cumin, tobacco, vanilla','FA WI','Night Date'],
+'le labo santal 33':['Sandalwood, cedar, cardamom, iris, leather, violet','FA WI SP','Casual Office Dressy'],
+'maison margiela jazz club':['Rum, tobacco leaf, vanilla, tonka, pepper','FA WI','Night Casual Date'],
+'maison margiela by the fireplace':['Chestnut, clove, smoke, vanilla, guaiac wood','FA WI','Casual Night'],
+'nishane hacivat':['Pineapple, grapefruit, oakmoss, patchouli, cedar','SP SU FA','Office Dressy Date'],
+'carolina herrera bad boy':['Bergamot, pepper, sage, cocoa, tonka, amberwood','FA WI','Night Date Casual'],
+'montale intense cafe':['Coffee, rose, vanilla, amber, musk','FA WI','Night Date'],
+'mancera cedrat boise':['Lemon, bergamot, apple, leather, patchouli, vanilla','SP SU FA','Office Casual Night'],
+'giardini di toscana bianco latte':['Fresh milk, vanilla, sugar, almond, coconut, white musk','FA WI SP','Casual Date Travel'],
+'armaf club de nuit intense man':['Pineapple, blackcurrant, birch, smoky woods, vanilla','SP SU FA','Office Night Date Dressy','Creed Aventus'],
+'armaf club de nuit sillage':['Bergamot, green tea, blackcurrant, musk, sandalwood','SP SU','Office Casual Travel','Creed Silver Mountain Water'],
+'armaf tres nuit':['Grapefruit, mint, ginger, cedar, incense','SP SU FA','Office Casual','Chanel Bleu de Chanel EDP'],
+'lattafa khamrah':['Cinnamon, dates, nutmeg, praline, tonka, vanilla','FA WI','Night Date Dressy','Kilian Angels Share'],
+'lattafa khamrah qahwa':['Coffee, cardamom, dates, cinnamon, tonka, vanilla','FA WI','Night Date'],
+'lattafa asad':['Pineapple, blackcurrant, coffee, tonka, patchouli','FA WI SP','Night Casual Date','Creed Aventus'],
+'lattafa fakhar':['Bergamot, apple, jasmine, patchouli, vanilla, musk','SP FA WI','Office Casual Date'],
+'lattafa yara':['Orchid, heliotrope, tangerine, vanilla, sandalwood, musk','FA WI','Casual Date'],
+'lattafa qaed al fursan':['Pineapple, apple, saffron, patchouli, vanilla, cedar','FA WI','Night Casual Date'],
+'lattafa ana abiyedh rouge':['Saffron, cardamom, cedar, amberwood, musk','FA WI SP','Night Dressy Date'],
+'lattafa raghba':['Vanilla, oud, sugar, incense, sandalwood','FA WI','Night Dressy'],
+'lattafa badee al oud':['Oud, rose, saffron, amber, musk','FA WI','Night Dressy'],
+'maison alhambra jean lowe ombre':['Leather, cardamom, jasmine, amber, moss','FA WI','Night Casual Dressy','Tom Ford Ombre Leather'],
+'maison alhambra jean lowe noir':['Cardamom, saffron, sweet milk, amber, sandalwood, vanilla','FA WI','Night Date Dressy','Tom Ford Noir Extreme'],
+'rasasi hawas':['Apple, bergamot, cinnamon, ambergris, driftwood, musk','SP SU FA','Office Casual Date Travel'],
+'afnan 9pm':['Apple, cinnamon, lavender, vanilla, tonka','FA WI','Night Casual Date'],
+'afnan supremacy not only intense':['Pineapple, bergamot, cinnamon, patchouli, oakmoss, vanilla','SP FA WI','Night Casual Office'],
+'al haramain amber oud gold':['Saffron, jasmine, amberwood, cedar, sweet resin','FA WI SP','Night Dressy Date','Maison Francis Kurkdjian Baccarat Rouge 540'],
+'al haramain l aventure':['Pineapple, bergamot, birch, oakmoss, musk','SP SU FA','Office Casual Date','Creed Aventus'],
+'orientica royal amber':['Saffron, amberwood, jasmine, cedar, resin','FA WI','Night Dressy Date'],
+'orientica velvet gold':['Peach, orange blossom, jasmine, vanilla, amber','SU FA','Night Date'],
+'bharara king':['Blackcurrant, cinnamon, honey, amber, tobacco, vanilla','FA WI','Night Date'],
+'swiss arabian shaghaf oud':['Oud, rose, saffron, praline, vanilla','FA WI','Night Dressy'],
+'louis vuitton imagination':['Bergamot, citrus, black tea, ginger, ambroxan, sandalwood','SP SU FA','Office Casual Date Travel'],
+'chanel bleu de chanel l exclusif':['Citrus, incense, cedar, sandalwood, amber','SP SU FA WI','Office Dressy Date'],
+'calvin klein euphoria men':['Ginger, pepper, cucumber, basil, sage, patchouli, amber','FA WI','Night Casual Date'],
+'bharara king':['Blackcurrant, cinnamon, honey, amber, tobacco, vanilla','FA WI','Night Date','Xerjoff Erba Pura'],
+'oakcha ineffable':['Pineapple, bergamot, blackcurrant, birch, smoky woods, musk','SP SU FA','Office Night Date Dressy','Creed Aventus'],
+'oakcha melting embers':['Chestnut, clove, smoke, vanilla, guaiac wood','FA WI','Casual Night','Maison Margiela By the Fireplace'],
+'the dua brand caribbean waters':['Lime, coconut, white rum, ginger, sugar cane','SU','Casual Travel','Creed Virgin Island Water'],
+'the dua brand imagine':['Bergamot, citrus, black tea, ginger, ambroxan, sandalwood','SP SU FA','Office Casual Date Travel','Louis Vuitton Imagination'],
+'rayhaan nocturno elixir':['Citrus, incense, cedar, sandalwood, amber','SP SU FA WI','Office Dressy Date','Chanel Bleu de Chanel L Exclusif'],
+'dossier woody sandalwood':['Violet leaf, cardamom, orris, ambrox, cedar, sandalwood, musk','FA WI SP','Casual Office Dressy','Le Labo Santal 33']
+};
+const SEASONCODE={SP:'Spring',SU:'Summer',FA:'Fall',WI:'Winter'};
 
 const SEASONS=['Spring','Summer','Fall','Winter'];
 const ABBR={Spring:'SP',Summer:'SU',Fall:'FA',Winter:'WI'};
@@ -625,6 +729,19 @@ function paintPreview(){
 }
 $('eKind').onchange=()=>{$('eCloneWrap').style.display=$('eKind').value==='dupe'?'block':'none';};
 function matched(v){const k=(v||'').trim().toLowerCase();return HOUSEOF[k]?k:null;}
+function setPicker(el,vals){
+  [...el.querySelectorAll('.pick')].forEach(b=>{
+    if(vals.includes(b.textContent))b.setAttribute('aria-pressed','true');
+  });
+}
+function applyProfile(k){
+  const p=PROF[k];if(!p)return;
+  if(!$('eNotes').value.trim())$('eNotes').value=p[0];
+  if(!readPicker($('eSeasons')).length)
+    setPicker($('eSeasons'),p[1].split(' ').map(c=>SEASONCODE[c]).filter(Boolean));
+  if(!readPicker($('eVibes')).length)setPicker($('eVibes'),p[2].split(' '));
+  return p[3];
+}
 $('eName').onchange=()=>{
   const k=matched($('eName').value);if(!k)return;
   const house=HOUSEOF[k];
@@ -634,11 +751,20 @@ $('eName').onchange=()=>{
   if(!RETAIL[k]&&$('eKind').value==='original'){
     $('eKind').value='dupe';$('eCloneWrap').style.display='block';
   }
-  if($('eKind').value==='original'&&$('eRetail').value===''&&RETAIL[k])$('eRetail').value=RETAIL[k];
+  const orig=applyProfile(k);
+  if(orig&&!$('eClone').value.trim()){
+    $('eClone').value=orig;
+    $('eKind').value='dupe';$('eCloneWrap').style.display='block';
+  }
+  const target=$('eKind').value==='dupe'
+    ? ($('eClone').value.trim().toLowerCase()||null)
+    : k;
+  if($('eRetail').value===''&&target&&RETAIL[target])$('eRetail').value=RETAIL[target];
 };
 $('eClone').onchange=()=>{
   const k=matched($('eClone').value);if(!k)return;
   if($('eRetail').value===''&&RETAIL[k])$('eRetail').value=RETAIL[k];
+  applyProfile(k);
 };
 $('eFill').oninput=()=>{$('eFillVal').textContent=$('eFill').value+'%';};
 $('ePhotoBtn').onclick=()=>$('ePhoto').click();
@@ -714,13 +840,46 @@ $('addBtn').onclick=()=>openEditor(null);
 $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
-$('mExport').onclick=()=>{
-  const blob=new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'application/json'});
+/* ---------------- backup ---------------- */
+const BK='shelf-lastbackup';
+function bkName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';}
+function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'application/json'});}
+function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}bkBar();bkLabel();}
+function bkAge(){try{const t=Number(localStorage.getItem(BK)||0);return t?Math.floor((Date.now()-t)/86400000):null;}catch(e){return null;}}
+function bkLabel(){
+  const d=bkAge();
+  $('mLast').textContent = d===null ? 'No backup sent yet.' :
+    d===0 ? 'Last backup, today.' : d===1 ? 'Last backup, yesterday.' : 'Last backup, '+d+' days ago.';
+}
+function bkBar(){
+  const d=bkAge(), bar=$('bkBar');
+  if(!items.length||sessionStorage.getItem('bkHush')){bar.classList.remove('on');return;}
+  if(d===null){$('bkMsg').textContent='No backup yet. Send one to Drive.';bar.classList.add('on');}
+  else if(d>=7){$('bkMsg').textContent='Last backup was '+d+' days ago.';bar.classList.add('on');}
+  else bar.classList.remove('on');
+}
+function bkDownload(){
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';
+  a.href=URL.createObjectURL(bkBlob());a.download=bkName();
   a.click();URL.revokeObjectURL(a.href);
-};
+  bkStamp();
+}
+async function bkShare(){
+  const file=new File([bkBlob()],bkName(),{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file],title:'Cologne shelf backup'});
+      bkStamp();toast('Sent');
+    }catch(e){ if(e&&e.name!=='AbortError')toast('Share did not open'); }
+  }else{
+    bkDownload();toast('Saved to this device. Upload it to Drive.');
+  }
+}
+$('mDrive').onclick=()=>{bkShare();};
+$('mExport').onclick=()=>{bkDownload();};
+$('bkNow').onclick=()=>{bkShare();};
+$('bkLater').onclick=()=>{try{sessionStorage.setItem('bkHush','1');}catch(e){}$('bkBar').classList.remove('on');};
+$('menuBtn').addEventListener('click',bkLabel);
 $('mImport').onclick=()=>$('mFile').click();
 $('mFile').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
@@ -742,7 +901,7 @@ async function save(){return store.set({app:'shelf',version:1,items});}
   try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
   const data=await store.get();
   items=(data&&data.items)||[];
-  buildChips();buildLists();render();
+  buildChips();buildLists();render();bkBar();bkLabel();
 })();
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){const open=document.querySelector('.sheet.open');if(open)hide(open.id);}
