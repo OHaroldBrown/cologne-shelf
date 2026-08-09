@@ -10,6 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="The Fragrance Shelf">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" sizes="128x128" href="icon-128.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>The Fragrance Shelf</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230C1416'/%3E%3Crect x='24' y='8' width='16' height='10' fill='%234FD1C5'/%3E%3Crect x='18' y='18' width='28' height='38' rx='3' fill='%234FD1C5'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C1416'/%3E%3Crect x='68' y='24' width='44' height='28' fill='%234FD1C5'/%3E%3Crect x='50' y='52' width='80' height='106' rx='8' fill='%234FD1C5'/%3E%3C/svg%3E">
@@ -227,12 +232,6 @@ input[type=file]{display:none}
   background:var(--ink);color:var(--glass);border:none;width:56px;height:56px;border-radius:50%;
   font-size:26px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28)
 }
-.pickme{
-  position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:50;
-  background:var(--accent);color:var(--onAccent);border:none;padding:0 18px;height:56px;border-radius:999px;
-  font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,0,0,.28)
-}
 .empty{padding:60px 24px;text-align:center}
 .empty p{margin:10px 0 0}
 .toast{
@@ -252,7 +251,7 @@ input[type=file]{display:none}
 @media print{
   html,body{background:#fff !important;color:#000 !important}
   :root{--glass:#fff;--panel:#fff;--ink:#000;--line:#000;--accent:#000;--onAccent:#fff;--vetiver:#000;--warn:#000}
-  header,.fab,.pickme,.chips,#search,.actions,.iconbtn,.toast{display:none !important}
+  header,.fab,.chips,#search,.actions,.iconbtn,.toast{display:none !important}
   .sheet{display:none !important}
   .grid{display:block;padding:0}
   .card{border:0;border-bottom:1px solid #000;display:grid;grid-template-columns:70px 1fr;gap:10px;page-break-inside:avoid;padding:6px 0}
@@ -288,13 +287,11 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261047</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261057</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
 </div>
-
-<button class="pickme" id="pickBtn">Pick one</button>
 <button class="fab" id="addBtn" aria-label="Add a bottle">+</button>
 <div class="toast" id="toast"></div>
 
@@ -382,7 +379,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261047</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261057</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -622,13 +619,6 @@ let pendingPhoto=null;
 const $=id=>document.getElementById(id);
 const money=n=>'$'+(Math.round(Number(n)||0)).toLocaleString();
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-function currentSeason(){
-  const m=new Date().getMonth();
-  if(m<=1||m===11)return 'Winter';
-  if(m<=4)return 'Spring';
-  if(m<=7)return 'Summer';
-  return 'Fall';
-}
 let toastTimer;
 function toast(msg){
   const t=$('toast');t.textContent=msg;t.classList.add('show');
@@ -984,21 +974,33 @@ $('eDelete').onclick=async()=>{
   await save();hide('editor');hide('detail');render();toast('Deleted');
 };
 
-/* ---------------- pick one ---------------- */
-$('pickBtn').onclick=()=>{
-  const s=currentSeason();
-  let pool=items.filter(it=>(it.seasons||[]).includes(s)&&(it.fill==null||it.fill>0));
-  if(!pool.length)pool=items.slice();
-  if(!pool.length){toast('Add a bottle first');return;}
-  pool.sort((a,b)=>(a.lastWorn||0)-(b.lastWorn||0));
-  const shortlist=pool.slice(0,Math.max(3,Math.ceil(pool.length/2)));
-  const choice=shortlist[Math.floor(Math.random()*shortlist.length)];
-  openDetail(choice.id);
-  toast(s+' pick');
-};
+
 
 /* ---------------- sheets ---------------- */
-function show(id){$(id).classList.add('open');$(id).setAttribute('aria-hidden','false');document.body.style.overflow='hidden';$(id).scrollTop=0;}
+/* Android back button steps back through open panels rather than exiting */
+let navDepth=0;
+function navPush(){try{history.pushState({shelf:++navDepth},'');}catch(e){}}
+window.addEventListener('popstate',()=>{
+  if(arranging){
+    arranging=false;document.body.classList.remove('arrange');buildChips();render();
+    navPush();return;
+  }
+  const open=[...document.querySelectorAll('.sheet.open')];
+  if(open.length){
+    const top=open[open.length-1];
+    top.classList.remove('open');top.setAttribute('aria-hidden','true');
+    if(!document.querySelector('.sheet.open'))document.body.style.overflow='';
+    navPush();return;
+  }
+  if($('builder')&&$('builder').classList.contains('on')){
+    $('builder').classList.remove('on');
+    if($('bOpen'))$('bOpen').style.display='';
+    navPush();return;
+  }
+});
+navPush();
+
+function show(id){navPush();$(id).classList.add('open');$(id).setAttribute('aria-hidden','false');document.body.style.overflow='hidden';$(id).scrollTop=0;}
 function hide(id){$(id).classList.remove('open');$(id).setAttribute('aria-hidden','true');if(!document.querySelector('.sheet.open'))document.body.style.overflow='';}
 $('addBtn').onclick=()=>openEditor(null);
 $('menuBtn').onclick=()=>show('menu');
@@ -1285,7 +1287,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261047';
+const BUILD='0809261057';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
