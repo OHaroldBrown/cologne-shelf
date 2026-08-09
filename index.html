@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261735</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261748</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -461,7 +461,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261735</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261748</p>
     <div class="actions">
       <button class="btn wide" id="mHelp">Getting started</button>
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
@@ -474,6 +474,8 @@ input[type=file]{display:none}
       <button class="btn wide" id="mPrompt">Copy the AI prompt</button>
       <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
       <button class="btn wide" id="mUndo">Undo the last change</button>
+      <button class="btn wide" id="mDedupe">Merge duplicates</button>
+      <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
     </div>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
     <p class="lbl" style="margin-top:24px">Add to home screen</p>
@@ -1474,7 +1476,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261735';
+const BUILD='0809261748';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1621,6 +1623,60 @@ $('mPrompt').onclick=async()=>{
     const t=document.createElement('textarea');t.value=AIPROMPT;document.body.appendChild(t);
     t.select();document.execCommand('copy');t.remove();toast('Prompt copied');
   }
+};
+
+/* ---------------- cleanup tools ---------------- */
+function dupKey(b){return ((b.name||'').trim().toLowerCase()+'|'+(b.house||'').trim().toLowerCase());}
+function dupScore(b){
+  /* the copy worth keeping is the one carrying the most */
+  let n=0;
+  if(b.photo)n+=100;
+  ['paid','retail','size','rating','longevity','projection','compliments'].forEach(f=>{if(b[f]!=null&&b[f]!=='')n+=4;});
+  if(b.notes)n+=6; if(b.comment)n+=6; if(b.cloneOf)n+=3;
+  n+=(b.seasons||[]).length+(b.vibes||[]).length;
+  n+=(b.wears||0);
+  return n;
+}
+$('mDedupe').onclick=async()=>{
+  const groups={};
+  items.forEach(b=>{(groups[dupKey(b)]=groups[dupKey(b)]||[]).push(b);});
+  const dups=Object.values(groups).filter(g=>g.length>1);
+  if(!dups.length){toast('No duplicates found');return;}
+  const extra=dups.reduce((a,g)=>a+g.length-1,0);
+  if(!confirm('Found '+dups.length+' duplicated '+(dups.length===1?'bottle':'bottles')+
+      ', '+extra+' extra '+(extra===1?'copy':'copies')+'.\n\nKeep the most complete one of each and merge in anything the others have that it is missing?'))return;
+  snapTake('merge duplicates');
+  const keep=[];
+  Object.values(groups).forEach(g=>{
+    g.sort((a,b)=>dupScore(b)-dupScore(a));
+    const win=g[0];
+    g.slice(1).forEach(lose=>{
+      Object.keys(lose).forEach(f=>{
+        if(f==='id')return;
+        const cur=win[f];
+        const empty = cur==null||cur===''||(Array.isArray(cur)&&!cur.length);
+        if(empty&&lose[f]!=null&&lose[f]!==''&&!(Array.isArray(lose[f])&&!lose[f].length))win[f]=lose[f];
+      });
+      win.wears=(win.wears||0)+(lose.wears||0);
+      if((lose.lastWorn||0)>(win.lastWorn||0))win.lastWorn=lose.lastWorn;
+    });
+    keep.push(win);
+  });
+  const order=items.map(b=>b.id);
+  items=keep.sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+  blends=blends.filter(bl=>bl.ids.every(id=>items.some(x=>x.id===id)));
+  await save();buildLists();render();hide('menu');
+  toast('Merged '+extra+', '+items.length+' left');
+};
+$('mWipe').onclick=async()=>{
+  if(!items.length&&!blends.length){toast('Already empty');return;}
+  if(!confirm('This deletes all '+items.length+' bottles and '+blends.length+' blends on this device.\n\nSend a backup first if you might want them back.'))return;
+  const typed=prompt('Type DELETE to confirm.');
+  if(typed!=='DELETE'){toast('Left alone');return;}
+  snapTake('wipe');
+  items=[];blends=[];
+  await save();buildLists();render();hide('menu');
+  toast('Shelf cleared. Undo still has it.');
 };
 
 /* ---------------- undo snapshots ---------------- */
