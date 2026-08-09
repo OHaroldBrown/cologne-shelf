@@ -257,7 +257,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809260949</div>
+<div id="build">BUILD 0809261005</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -343,13 +343,14 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809260949</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261005</p>
     <div class="actions">
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
-      <button class="btn wide" id="mSeed">Load my bottles</button>
+      <button class="btn wide" id="mLink">Load my shelf from a link</button>
+      <button class="btn wide" id="mLinkSet">Change that link</button>
       <button class="btn wide" id="mUndo">Undo the last change</button>
     </div>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
@@ -950,7 +951,7 @@ $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
 /* ---------------- version check ---------------- */
-const BUILD='0809260949';
+const BUILD='0809261005';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -964,6 +965,35 @@ async function checkBuild(){
     }
   }catch(e){}
 }
+
+/* ---------------- load from a link ---------------- */
+const LNK='shelf-link';
+function linkGet(){try{return localStorage.getItem(LNK)||'';}catch(e){return '';}}
+function linkSet(){
+  const cur=linkGet();
+  const v=prompt('Paste the raw URL of your shelf backup. Leave blank to forget it.',cur);
+  if(v===null)return;
+  try{v.trim()?localStorage.setItem(LNK,v.trim()):localStorage.removeItem(LNK);}catch(e){}
+  toast(v.trim()?'Link saved':'Link cleared');
+}
+async function linkLoad(){
+  let u=linkGet();
+  if(!u){linkSet();u=linkGet();if(!u)return;}
+  toast('Fetching');
+  try{
+    const r=await fetch(u,{cache:'no-store'});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    if(!d.items||!Array.isArray(d.items))throw 0;
+    if(items.length&&!confirm('This replaces all '+items.length+' bottles with the '+d.items.length+' at that link. Continue?'))
+      {toast('Left alone');return;}
+    snapTake('link');
+    items=d.items;await save();buildLists();render();hide('menu');
+    toast('Loaded '+items.length);
+  }catch(e){toast('That link did not load');}
+}
+$('mLink')&&($('mLink').onclick=linkLoad);
+$('mLinkSet')&&($('mLinkSet').onclick=linkSet);
 
 /* ---------------- undo snapshots ---------------- */
 /* Keeps the last 3 states before anything destructive. */
@@ -1030,15 +1060,6 @@ $('mExport').onclick=()=>{bkDownload();};
 $('bkNow').onclick=()=>{bkShare();};
 $('bkLater').onclick=()=>{try{sessionStorage.setItem('bkHush','1');}catch(e){}$('bkBar').classList.remove('on');};
 $('menuBtn').addEventListener('click',bkLabel);
-$('mSeed').onclick=async()=>{
-  snapTake('load');
-  const have=new Set(items.map(b=>b.id));
-  const add=SEED.filter(b=>!have.has(b.id));
-  if(!add.length){toast('Already on the shelf');return;}
-  items=items.concat(JSON.parse(JSON.stringify(add)));
-  try{localStorage.setItem('shelf-seeded','1');}catch(e){}
-  await save();buildLists();render();hide('menu');toast('Added '+add.length);
-};
 $('mImport').onclick=()=>$('mFile').click();
 $('mFile').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
@@ -1055,314 +1076,6 @@ $('mFile').onchange=e=>{
   fr.readAsText(f);
 };
 $('search').oninput=e=>{filter.q=e.target.value;render();};
-
-/* ---------------- seed ----------------
-   Harold's shelf. Loads once, only when the app has nothing in it. */
-const SEED=[
- {
-  "id": "sd-king",
-  "name": "King",
-  "house": "Bharara",
-  "kind": "dupe",
-  "cloneOf": "Xerjoff Erba Pura",
-  "paid": null,
-  "retail": 237,
-  "size": 100,
-  "rating": null,
-  "seasons": [
-   "Fall",
-   "Winter"
-  ],
-  "vibes": [
-   "Night",
-   "Date"
-  ],
-  "fill": 100,
-  "notes": "Blackcurrant, cinnamon, honey, amber, tobacco, vanilla",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-ineff",
-  "name": "Ineffable",
-  "house": "Oakcha",
-  "kind": "dupe",
-  "cloneOf": "Creed Aventus",
-  "paid": null,
-  "retail": 335,
-  "size": 50,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer",
-   "Fall"
-  ],
-  "vibes": [
-   "Office",
-   "Night",
-   "Date",
-   "Dressy"
-  ],
-  "fill": 100,
-  "notes": "Pineapple, bergamot, blackcurrant, birch, smoky woods, musk",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-carib",
-  "name": "Caribbean Waters",
-  "house": "The Dua Brand",
-  "kind": "dupe",
-  "cloneOf": "Creed Virgin Island Water",
-  "paid": null,
-  "retail": 360,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Summer"
-  ],
-  "vibes": [
-   "Casual",
-   "Travel"
-  ],
-  "fill": 100,
-  "notes": "Lime, coconut, white rum, ginger, sugar cane",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-imag",
-  "name": "Imagine",
-  "house": "The Dua Brand",
-  "kind": "dupe",
-  "cloneOf": "Louis Vuitton Imagination",
-  "paid": null,
-  "retail": 320,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer",
-   "Fall"
-  ],
-  "vibes": [
-   "Office",
-   "Casual",
-   "Date",
-   "Travel"
-  ],
-  "fill": 100,
-  "notes": "Bergamot, citrus, black tea, ginger, ambroxan, sandalwood",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-melt",
-  "name": "Melting Embers",
-  "house": "Oakcha",
-  "kind": "dupe",
-  "cloneOf": "Maison Margiela By the Fireplace",
-  "paid": null,
-  "retail": 140,
-  "size": 50,
-  "rating": null,
-  "seasons": [
-   "Fall",
-   "Winter"
-  ],
-  "vibes": [
-   "Casual",
-   "Night"
-  ],
-  "fill": 100,
-  "notes": "Chestnut, clove, smoke, vanilla, guaiac wood",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-noct",
-  "name": "Nocturno Elixir",
-  "house": "Rayhaan",
-  "kind": "dupe",
-  "cloneOf": "Chanel Bleu de Chanel L Exclusif",
-  "paid": null,
-  "retail": 275,
-  "size": 100,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer",
-   "Fall",
-   "Winter"
-  ],
-  "vibes": [
-   "Office",
-   "Dressy",
-   "Date"
-  ],
-  "fill": 100,
-  "notes": "Citrus, incense, cedar, sandalwood, amber",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-wood",
-  "name": "Woody Sandalwood",
-  "house": "Dossier",
-  "kind": "dupe",
-  "cloneOf": "Le Labo Santal 33",
-  "paid": null,
-  "retail": 385,
-  "size": 50,
-  "rating": null,
-  "seasons": [
-   "Fall",
-   "Winter",
-   "Spring"
-  ],
-  "vibes": [
-   "Casual",
-   "Office",
-   "Dressy"
-  ],
-  "fill": 100,
-  "notes": "Violet leaf, cardamom, orris, ambrox, cedar, sandalwood, musk",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-comgold",
-  "name": "Gold",
-  "house": "Commodity",
-  "kind": "original",
-  "cloneOf": "",
-  "paid": null,
-  "retail": null,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Fall",
-   "Winter"
-  ],
-  "vibes": [
-   "Casual",
-   "Night",
-   "Dressy"
-  ],
-  "fill": 100,
-  "notes": "Musk, juniper, vanilla, amber, sandalwood, benzoin",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-combook",
-  "name": "Book",
-  "house": "Commodity",
-  "kind": "original",
-  "cloneOf": "",
-  "paid": null,
-  "retail": null,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Fall"
-  ],
-  "vibes": [
-   "Office",
-   "Casual"
-  ],
-  "fill": 100,
-  "notes": "Virginia cedar, eucalyptus, rosewood, bergamot, cypress, amyris, amber, sandalwood, musk",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-compaper",
-  "name": "Paper",
-  "house": "Commodity",
-  "kind": "original",
-  "cloneOf": "",
-  "paid": null,
-  "retail": null,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer",
-   "Fall",
-   "Winter"
-  ],
-  "vibes": [
-   "Office",
-   "Casual"
-  ],
-  "fill": 100,
-  "notes": "Iso E Super, cedar, sandalwood",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-comjuice",
-  "name": "Juice",
-  "house": "Commodity",
-  "kind": "original",
-  "cloneOf": "",
-  "paid": null,
-  "retail": null,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer"
-  ],
-  "vibes": [
-   "Casual"
-  ],
-  "fill": 100,
-  "notes": "",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- },
- {
-  "id": "sd-why",
-  "name": "Why",
-  "house": "Oakcha",
-  "kind": "dupe",
-  "cloneOf": "Yves Saint Laurent Y",
-  "paid": null,
-  "retail": 130,
-  "size": null,
-  "rating": null,
-  "seasons": [
-   "Spring",
-   "Summer",
-   "Fall"
-  ],
-  "vibes": [
-   "Office",
-   "Casual",
-   "Night",
-   "Date"
-  ],
-  "fill": 100,
-  "notes": "Ginger, grapefruit, aldehydes, apple, lavender, sage, geranium, tonka, cedar, olibanum, patchouli",
-  "photo": null,
-  "wears": 0,
-  "lastWorn": null
- }
-];
 
 /* ---------------- boot ---------------- */
 async function save(){return store.set({app:'shelf',version:1,items});}
