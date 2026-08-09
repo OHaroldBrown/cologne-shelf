@@ -89,6 +89,16 @@ header{
 .chips::-webkit-scrollbar{display:none}
 #houses{display:none}
 #houses.on{display:flex}
+.lay{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--panel)}
+.lay h4{margin:0 0 4px;font-size:15px}
+.lay .why{font-size:13px;opacity:.8;margin:0 0 8px}
+.lay .ord{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0 0 8px}
+.lay .fitbar{height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:8px}
+.lay .fitbar i{display:block;height:100%;background:var(--accent)}
+.lay .tagcur{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--accent);color:var(--onAccent);padding:2px 7px;border-radius:20px;margin-bottom:6px}
+.lay .mini{display:flex;gap:6px;margin-top:6px}
+.lay .mini button{flex:1;font-size:13px;padding:7px;border:1px solid var(--line);border-radius:8px;background:none}
 .chip.house{border-style:dashed}
 .card.dragging{opacity:.4}
 .card.over{outline:2px dashed var(--accent);outline-offset:2px}
@@ -257,7 +267,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809261011</div>
+<div id="build">BUILD 0809261030</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -274,6 +284,14 @@ input[type=file]{display:none}
     <button class="btn" id="dEdit">Edit</button>
   </div>
   <div class="sheetbody" id="dBody"></div>
+</section>
+
+<section class="sheet" id="layers" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="lClose">Back</button>
+    <strong>Layering</strong>
+  </div>
+  <div class="sheetbody" id="lBody"></div>
 </section>
 
 <!-- editor -->
@@ -343,8 +361,9 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261011</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261030</p>
     <div class="actions">
+      <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
@@ -574,6 +593,7 @@ const VIBES=['Office','Night','Date','Casual','Dressy','Travel'];
 let items=[];
 let filter={q:'',season:'',vibe:'',kind:'',house:''};
 let arranging=false;
+let blends=[];
 let editingId=null;
 let pendingPhoto=null;
 
@@ -782,7 +802,14 @@ function openDetail(id){
     </div>
     <div class="actions">
       <button class="btn solid wide" id="dWore">Wearing it today</button>
-    </div>`;
+    </div>
+    <div id="dLayer"></div>`;
+  const partners=partnersFor(it,3).filter(r=>r.score>=35);
+  if(partners.length){
+    $('dLayer').innerHTML='<h3 class="disp" style="margin:22px 0 10px">Layer it with</h3>'
+      +partners.map(r=>layCard(r,it)).join('');
+    wireSave($('dLayer'));
+  }
   $('dWore').onclick=async()=>{
     it.lastWorn=Date.now();it.wears=(it.wears||0)+1;
     if(it.fill!=null&&it.fill>0)it.fill=Math.max(0,it.fill-1);
@@ -948,8 +975,227 @@ $('addBtn').onclick=()=>openEditor(null);
 $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
+
+/* ================= layering ================= */
+/* Accord families read out of the notes text. */
+const FAM={
+ citrus:['bergamot','lemon','lime','grapefruit','orange','mandarin','citrus','neroli','petitgrain','yuzu','citron'],
+ fruity:['pineapple','apple','blackcurrant','raspberry','peach','pear','berry','plum','fruity','melon','lychee'],
+ aquatic:['marine','aquatic','sea','salt','water','ozonic','calone','coconut water'],
+ green:['basil','sage','mint','lavender','violet leaf','green','herbal','eucalyptus','cypress','juniper','geranium','rosemary'],
+ spicy:['pepper','cardamom','cinnamon','clove','ginger','saffron','nutmeg','spice','pink pepper'],
+ sweet:['vanilla','caramel','praline','honey','sugar','tonka','coconut','chocolate','almond','gourmand','milk','toffee'],
+ woody:['cedar','sandalwood','vetiver','woody','woods','guaiac','cypriol','patchouli','amyris','rosewood','iso e super'],
+ smoky:['smoke','smoky','birch','incense','olibanum','tobacco','leathery smoke','fireplace','chestnut'],
+ amber:['amber','ambroxan','ambrox','labdanum','benzoin','resin','myrrh','opoponax'],
+ floral:['rose','jasmine','iris','orris','floral','ylang','tuberose','orange blossom','lily','violet'],
+ musk:['musk','white musk','skin'],
+ oud:['oud','agarwood'],
+ leather:['leather','suede']
+};
+/* Which families read as bright tops versus deep bases. */
+const BRIGHT=['citrus','fruity','aquatic','green'];
+const DEEP=['woody','smoky','amber','oud','leather','sweet'];
+/* Pairs that classically play well together. */
+const GOODPAIR=[['citrus','amber'],['citrus','woody'],['fruity','smoky'],['fruity','woody'],
+ ['aquatic','woody'],['aquatic','amber'],['green','woody'],['green','amber'],['spicy','sweet'],
+ ['sweet','woody'],['sweet','smoky'],['floral','woody'],['citrus','sweet'],['fruity','amber'],
+ ['green','musk'],['floral','musk'],['spicy','oud'],['sweet','oud'],['leather','smoky']];
+
+function famsOf(it){
+  const hay=((it.notes||'')+' '+(it.name||'')).toLowerCase();
+  const out=[];
+  for(const f in FAM){ if(FAM[f].some(w=>hay.includes(w))) out.push(f); }
+  return out;
+}
+function weight(f){return DEEP.includes(f)?2:1;}
+function depth(fams){ /* negative is bright, positive is deep */
+  let d=0; fams.forEach(f=>{ if(DEEP.includes(f))d++; if(BRIGHT.includes(f))d--; });
+  return d;
+}
+function pairScore(a,b){
+  const fa=famsOf(a), fb=famsOf(b);
+  if(!fa.length||!fb.length)return null;
+  const shared=fa.filter(f=>fb.includes(f));
+  const seasons=(a.seasons||[]).filter(s=>(b.seasons||[]).includes(s));
+  const narrow=Math.min(fa.length,fb.length);
+  let score=0, pro=[], con=[];
+
+  /* shared families, measured against the simpler of the two */
+  const bridge=shared.length/narrow;
+  score+=Math.round(bridge*28);
+  if(shared.length)pro.push('both lean '+shared.slice(0,2).join(' and '));
+  else{score-=18;con.push('nothing in common, they will sit apart rather than blend');}
+
+  /* classic complementary families */
+  const comp=GOODPAIR.filter(([x,y])=>(fa.includes(x)&&fb.includes(y))||(fa.includes(y)&&fb.includes(x)));
+  score+=Math.min(comp.length,2)*11;
+  if(comp.length)pro.push(comp[0][0]+' over '+comp[0][1]+' is a classic pairing');
+
+  /* one lifts, one anchors */
+  const da=depth(fa), db=depth(fb);
+  if((da<=0&&db>0)||(db<=0&&da>0)){score+=22;pro.push('one brightens while the other anchors');}
+  else if(da>1&&db>1){score-=22;con.push('both are heavy, one will bury the other');}
+  else if(da<0&&db<0){score-=10;con.push('both are bright, little to hold them down');}
+
+  /* season fit */
+  const sfit=(a.seasons||[]).length&&(b.seasons||[]).length
+    ? seasons.length/Math.min((a.seasons||[]).length,(b.seasons||[]).length) : 0;
+  score+=Math.round(sfit*16);
+  if(!seasons.length&&(a.seasons||[]).length&&(b.seasons||[]).length){
+    score-=20;con.push('they suit different seasons');}
+
+  /* two busy fragrances muddy each other */
+  if(fa.length>=5&&fb.length>=5){score-=12;con.push('both are busy scents, they can muddy each other');}
+
+  const base=(da>=db)?a:b, top=(base===a)?b:a;
+  return {score:Math.max(0,Math.min(88,score)), pro:pro, con:con, base:base, top:top,
+          seasons:seasons, shared:shared};
+}
+/* Well known combinations, matched on the original a bottle copies or its own name. */
+const CURATED=[
+ ['aventus','bianco latte','the fruity smoke under the milky sweetness, a hobby favourite'],
+ ['aventus','santal 33','pineapple smoke over creamy sandalwood'],
+ ['santal 33','by the fireplace','sandalwood under woodsmoke, deep autumn'],
+ ['santal 33','bianco latte','creamy on creamy, soft and skin close'],
+ ['bleu de chanel','santal 33','citrus incense lifted by sandalwood'],
+ ['virgin island water','bianco latte','coconut lime with milk, a summer dessert'],
+ ['virgin island water','santal 33','rum lime over dry woods'],
+ ['imagination','santal 33','tea and ginger over sandalwood'],
+ ['by the fireplace','bianco latte','smoke and milk, the classic cosy blend'],
+ ['erba pura','aventus','fruit stacked on fruit smoke, spray light'],
+ ['y ','bleu de chanel','two blue fragrances, sharper and longer together'],
+ ['euphoria','by the fireplace','spiced woods warmed by smoke']
+];
+function curatedFor(a,b){
+  const key=x=>((x.cloneOf||'')+' '+(x.name||'')).toLowerCase();
+  const ka=key(a), kb=key(b);
+  for(const [x,y,txt] of CURATED){
+    if((ka.includes(x)&&kb.includes(y))||(ka.includes(y)&&kb.includes(x)))return txt;
+  }
+  return '';
+}
+function partnersFor(it,limit){
+  const out=[];
+  items.forEach(o=>{
+    if(o.id===it.id)return;
+    const r=pairScore(it,o);
+    if(!r)return;
+    const cur=curatedFor(it,o);
+    if(cur){r.score=Math.min(100,r.score+14);r.curated=cur;}
+    r.other=o;out.push(r);
+  });
+  out.sort((x,y)=>y.score-x.score);
+  return limit?out.slice(0,limit):out;
+}
+function blendLine(r){
+  if(r.curated)return r.curated;
+  if(r.score>=55){
+    if(r.pro.length)return r.pro[0]+(r.pro[1]?', '+r.pro[1]:'');
+    return 'worth a try';
+  }
+  if(r.con.length)return 'Careful, '+r.con.join(', ');
+  return 'no strong reason either way';
+}
+
+
+/* ---------------- layering screens ---------------- */
+function layCard(r,anchor){
+  const o=r.other;
+  return `<div class="lay">
+    ${r.curated?'<span class="tagcur">Known combo</span><br>':''}
+    <h4>${esc(anchor.name)} + ${esc(o.name)}</h4>
+    <div class="fitbar"><i style="width:${r.score}%"></i></div>
+    <p class="why">${esc(blendLine(r))}</p>
+    <p class="ord">First ${esc(r.base.name)}, then ${esc(r.top.name)}${r.seasons.length?' &middot; '+r.seasons.join(', '):''}</p>
+    <div class="mini">
+      <button data-save="${anchor.id}|${o.id}">Save this blend</button>
+    </div>
+  </div>`;
+}
+function wireSave(root){
+  root.querySelectorAll('[data-save]').forEach(b=>{
+    b.onclick=async()=>{
+      const [a,c]=b.dataset.save.split('|');
+      const A=items.find(x=>x.id===a), C=items.find(x=>x.id===c);
+      if(!A||!C)return;
+      if(blends.some(x=>x.ids.slice().sort().join()===[a,c].sort().join())){toast('Already saved');return;}
+      const name=prompt('Name this blend', A.name+' + '+C.name);
+      if(name===null)return;
+      blends.push({id:'bl'+Date.now().toString(36),name:name||A.name+' + '+C.name,
+        ids:[a,c],ratio:'',rating:null,wears:0,lastWorn:null,note:''});
+      await save();toast('Saved');openLayers();
+    };
+  });
+}
+function openLayers(){
+  const body=$('lBody');
+  if(items.length<2){ body.innerHTML='<p>Add at least two bottles and suggestions show up here.</p>'; show('layers'); return; }
+
+  /* best pairs across the whole shelf */
+  const seen={}, all=[];
+  items.forEach(a=>partnersFor(a).forEach(r=>{
+    const k=[a.id,r.other.id].sort().join();
+    if(seen[k])return; seen[k]=1; r.anchor=a; all.push(r);
+  }));
+  all.sort((x,y)=>y.score-x.score);
+  const top=all.slice(0,8);
+
+  const blendHtml=blends.length?blends.map(b=>{
+    const parts=b.ids.map(i=>{const it=items.find(x=>x.id===i);return it?it.name:'gone';});
+    return `<div class="lay">
+      <h4>${esc(b.name)}</h4>
+      <p class="why">${esc(parts.join(' + '))}${b.ratio?' &middot; '+esc(b.ratio):''}</p>
+      <p class="ord">${b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'not rated'} &middot; worn ${b.wears||0}${b.lastWorn?' &middot; last '+new Date(b.lastWorn).toLocaleDateString():''}</p>
+      ${b.note?'<p class="why">'+esc(b.note)+'</p>':''}
+      <div class="mini">
+        <button data-wore="${b.id}">Wore it</button>
+        <button data-rate="${b.id}">Rate</button>
+        <button data-ratio="${b.id}">Ratio</button>
+        <button data-del="${b.id}">Delete</button>
+      </div>
+    </div>`;}).join(''):'<p style="opacity:.7">No saved blends yet. Save one from the suggestions below.</p>';
+
+  body.innerHTML=`
+    <h3 class="disp" style="margin:0 0 10px">Your blends</h3>
+    ${blendHtml}
+    <h3 class="disp" style="margin:22px 0 10px">Best pairs on your shelf</h3>
+    ${top.map(r=>layCard(r,r.anchor)).join('')}`;
+
+  wireSave(body);
+  body.querySelectorAll('[data-wore]').forEach(b=>b.onclick=async()=>{
+    const bl=blends.find(x=>x.id===b.dataset.wore);if(!bl)return;
+    bl.wears=(bl.wears||0)+1;bl.lastWorn=Date.now();
+    bl.ids.forEach(i=>{const it=items.find(x=>x.id===i);
+      if(it){it.lastWorn=Date.now();it.wears=(it.wears||0)+1;
+             if(it.fill!=null&&it.fill>0)it.fill=Math.max(0,it.fill-1);}});
+    await save();render();openLayers();toast('Logged');
+  });
+  body.querySelectorAll('[data-rate]').forEach(b=>b.onclick=async()=>{
+    const bl=blends.find(x=>x.id===b.dataset.rate);if(!bl)return;
+    const v=prompt('Rate this blend 1 to 5, blank to clear',bl.rating||'');
+    if(v===null)return;
+    bl.rating=v?Math.max(1,Math.min(5,Number(v)||0)):null;
+    await save();openLayers();
+  });
+  body.querySelectorAll('[data-ratio]').forEach(b=>b.onclick=async()=>{
+    const bl=blends.find(x=>x.id===b.dataset.ratio);if(!bl)return;
+    const v=prompt('How do you spray it, for example 2 sprays of the first and 1 of the second',bl.ratio||'');
+    if(v===null)return;
+    bl.ratio=v.trim();await save();openLayers();
+  });
+  body.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const bl=blends.find(x=>x.id===b.dataset.del);if(!bl)return;
+    if(!confirm('Delete the blend '+bl.name+'?'))return;
+    blends=blends.filter(x=>x.id!==bl.id);await save();openLayers();toast('Deleted');
+  });
+  show('layers');
+}
+$('lClose').onclick=()=>hide('layers');
+$('mLayers').onclick=()=>{hide('menu');openLayers();};
+
 /* ---------------- version check ---------------- */
-const BUILD='0809261011';
+const BUILD='0809261030';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -970,7 +1216,7 @@ const SNAP='shelf-snaps';
 function snapTake(label){
   try{
     const a=JSON.parse(localStorage.getItem(SNAP)||'[]');
-    a.unshift({when:Date.now(),label:label,items:items});
+    a.unshift({when:Date.now(),label:label,items:items,blends:blends});
     localStorage.setItem(SNAP,JSON.stringify(a.slice(0,3)));
   }catch(e){}
 }
@@ -980,7 +1226,7 @@ async function snapUndo(){
   if(!a.length){toast('Nothing to undo');return;}
   const s0=a.shift();
   try{localStorage.setItem(SNAP,JSON.stringify(a));}catch(e){}
-  items=s0.items;await save();buildLists();render();hide('menu');
+  items=s0.items;blends=s0.blends||[];await save();buildLists();render();hide('menu');
   toast('Rolled back to '+s0.items.length+' bottles');
 }
 $('mUndo')&&($('mUndo').onclick=snapUndo);
@@ -990,7 +1236,7 @@ const BK='shelf-lastbackup';
 function bkName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';}
 /* Chrome Android blocks .json through the share sheet, so share it as text */
 function bkShareName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.txt';}
-function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'application/json'});}
+function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items,blends},null,2)],{type:'application/json'});}
 function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}bkBar();bkLabel();}
 function bkAge(){try{const t=Number(localStorage.getItem(BK)||0);return t?Math.floor((Date.now()-t)/86400000):null;}catch(e){return null;}}
 function bkLabel(){
@@ -1012,7 +1258,7 @@ function bkDownload(){
   bkStamp();
 }
 async function bkShare(){
-  const txt=new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'text/plain'});
+  const txt=new Blob([JSON.stringify({app:'shelf',version:1,items,blends},null,2)],{type:'text/plain'});
   const file=new File([txt],bkShareName(),{type:'text/plain'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{
@@ -1039,7 +1285,7 @@ $('mFile').onchange=e=>{
       if(!d.items)throw 0;
       snapTake('restore');
       if(items.length&&!confirm('This replaces all '+items.length+' bottles on the shelf with the '+d.items.length+' in the file. Continue?')){toast('Left alone');return;}
-      items=d.items;await save();render();hide('menu');toast('Restored');
+      items=d.items;blends=d.blends||[];await save();render();hide('menu');toast('Restored');
     }catch(err){toast('That file did not read');}
   };
   fr.readAsText(f);
@@ -1047,11 +1293,12 @@ $('mFile').onchange=e=>{
 $('search').oninput=e=>{filter.q=e.target.value;render();};
 
 /* ---------------- boot ---------------- */
-async function save(){return store.set({app:'shelf',version:1,items});}
+async function save(){return store.set({app:'shelf',version:1,items,blends});}
 (async function init(){
   try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
   const data=await store.get();
   items=(data&&data.items)||[];
+  blends=(data&&data.blends)||[];
   buildChips();buildLists();render();dragWire();bkBar();bkLabel();checkBuild();
 })();
 document.addEventListener('keydown',e=>{
