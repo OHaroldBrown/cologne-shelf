@@ -289,7 +289,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261108</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261113</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -383,7 +383,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261108</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261113</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -816,7 +816,10 @@ function openDetail(id){
       ${row('Retail',it.retail?money(it.retail):'')}
       ${row('Size',it.size?it.size+' ml':'')}
       ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
-      ${row('My rating',it.rating?it.rating+' / 10':'',true)}
+      <div class="row" id="dRateRow" style="cursor:pointer">
+        <span class="k">My rating</span>
+        <span class="v txt">${it.rating?it.rating+' / 10':'tap to rate'}</span>
+      </div>
       ${row('Reach for it',(it.vibes||[]).join(', '),true)}
       ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
       ${row('Last worn',it.lastWorn?new Date(it.lastWorn).toLocaleDateString():'never',true)}
@@ -834,6 +837,12 @@ function openDetail(id){
       +partners.map(r=>layCard(r,it)).join('');
     wireSave($('dLayer'));
   }
+  $('dRateRow').onclick=async()=>{
+    const v=prompt('Rate '+(it.name||'this one')+' from 1 to 10. Blank clears it.', it.rating||'');
+    if(v===null)return;
+    it.rating = v.trim()==='' ? null : Math.max(1,Math.min(10,Number(v)||0));
+    await save();openDetail(id);
+  };
   $('dWore').onclick=async()=>{
     it.lastWorn=Date.now();it.wears=(it.wears||0)+1;
     if(it.fill!=null&&it.fill>0)it.fill=Math.max(0,it.fill-1);
@@ -1294,7 +1303,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261108';
+const BUILD='0809261113';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
