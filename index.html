@@ -101,7 +101,6 @@ header{
 @media(max-width:430px){.brand{font-size:23px}}
 @media(max-width:360px){.brand{font-size:20px}}
 .brand em{font-style:italic;font-weight:400}
-.count{font-size:20px;font-weight:700;padding-bottom:2px;letter-spacing:0}
 .iconbtn{
   background:none;border:1px solid var(--line);border-radius:999px;
   width:34px;height:34px;display:grid;place-items:center;cursor:pointer;font-size:15px
@@ -281,7 +280,6 @@ input[type=file]{display:none}
   <div class="brandrow">
     <h1 class="brand disp">The <em>Fragrance Shelf</em></h1>
     <div class="tools">
-      <span class="count mono" id="countLbl">0</span>
       <button class="iconbtn" id="themeBtn" title="Light or dark" aria-label="Light or dark">☀</button>
       <button class="iconbtn" id="menuBtn" title="Backup and restore">⋯</button>
     </div>
@@ -301,7 +299,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261133</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261135</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -397,7 +395,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261133</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261135</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -775,7 +773,6 @@ function render(){
   const list=visible();
   const g=$('grid');g.innerHTML='';
   $('empty').style.display=items.length?'none':'block';
-  $('countLbl').textContent=items.length;
   list.forEach(it=>{
     const card=document.createElement('article');
     card.className='card';card.tabIndex=0;card.dataset.id=it.id;
@@ -1334,7 +1331,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261133';
+const BUILD='0809261135';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
