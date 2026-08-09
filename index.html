@@ -80,6 +80,18 @@ header{
 #search:focus{border-color:var(--ink)}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-top:9px;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
+#houses{display:none}
+#houses.on{display:flex}
+.chip.house{border-style:dashed}
+.card.dragging{opacity:.4}
+.card.over{outline:2px dashed var(--accent);outline-offset:2px}
+.card .grip{
+  position:absolute;top:6px;left:6px;z-index:3;width:30px;height:30px;
+  display:none;align-items:center;justify-content:center;border-radius:8px;
+  background:rgba(0,0,0,.55);color:#fff;font-size:15px;line-height:1;cursor:grab;touch-action:none}
+body.arrange .card .grip{display:flex}
+body.arrange .card{cursor:grab;touch-action:none;user-select:none}
+#arrangeBtn[aria-pressed="true"]{background:var(--ink);color:var(--glass);border-color:var(--ink)}
 .chip{
   white-space:nowrap;border:1px solid var(--line);background:none;border-radius:999px;
   padding:6px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer
@@ -226,6 +238,7 @@ input[type=file]{display:none}
   </div>
   <input id="search" type="text" placeholder="Search name, house, or the original" autocomplete="off">
   <div class="chips" id="chips"></div>
+  <div class="chips" id="houses"></div>
 </header>
 <div id="bkBar"><span id="bkMsg"></span><button class="go" id="bkNow">Back up</button><button id="bkLater">Later</button></div>
 
@@ -328,6 +341,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
       <button class="btn wide" id="mSeed">Load my bottles</button>
+      <button class="btn wide" id="mUndo">Undo the last change</button>
     </div>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
     <p class="lbl" style="margin-top:24px">Add to home screen</p>
@@ -550,7 +564,8 @@ const SEASONS=['Spring','Summer','Fall','Winter'];
 const ABBR={Spring:'SP',Summer:'SU',Fall:'FA',Winter:'WI'};
 const VIBES=['Office','Night','Date','Casual','Dressy','Travel'];
 let items=[];
-let filter={q:'',season:'',vibe:'',kind:''};
+let filter={q:'',season:'',vibe:'',kind:'',house:''};
+let arranging=false;
 let editingId=null;
 let pendingPhoto=null;
 
@@ -585,6 +600,43 @@ let printPrev='light';
 window.addEventListener('beforeprint',()=>{printPrev=document.documentElement.getAttribute('data-theme');setTheme('light');});
 window.addEventListener('afterprint',()=>setTheme(printPrev));
 
+/* ---------------- drag to rearrange ---------------- */
+let dragEl=null;
+function dragCommit(){
+  const order=[...$('grid').children].map(c=>c.dataset.id);
+  const map={};items.forEach(b=>map[b.id]=b);
+  const next=order.map(id=>map[id]).filter(Boolean);
+  items.forEach(b=>{if(!order.includes(b.id))next.push(b);});
+  items=next;save();
+}
+function dragWire(){
+  const g=$('grid');
+  g.addEventListener('pointerdown',e=>{
+    if(!arranging)return;
+    const card=e.target.closest('.card');if(!card)return;
+    dragEl=card;card.classList.add('dragging');
+    try{card.setPointerCapture(e.pointerId);}catch(err){}
+    e.preventDefault();
+  });
+  g.addEventListener('pointermove',e=>{
+    if(!dragEl)return;
+    e.preventDefault();
+    const under=document.elementFromPoint(e.clientX,e.clientY);
+    const over=under&&under.closest('.card');
+    if(!over||over===dragEl||over.parentNode!==g)return;
+    const r=over.getBoundingClientRect();
+    const before=e.clientX<r.left+r.width/2;
+    g.insertBefore(dragEl,before?over:over.nextSibling);
+  });
+  const done=()=>{
+    if(!dragEl)return;
+    dragEl.classList.remove('dragging');dragEl=null;
+    dragCommit();
+  };
+  g.addEventListener('pointerup',done);
+  g.addEventListener('pointercancel',done);
+}
+
 /* ---------------- chips ---------------- */
 function buildChips(){
   const c=$('chips');c.innerHTML='';
@@ -595,10 +647,54 @@ function buildChips(){
     b.onclick=()=>{filter[type]=filter[type]===val?'':val;buildChips();render();};
     c.appendChild(b);
   };
+  const brands=document.createElement('button');
+  brands.className='chip';brands.id='brandTog';
+  brands.textContent=filter.house?filter.house:'Brands';
+  brands.setAttribute('aria-pressed',!!filter.house);
+  brands.onclick=()=>{
+    const row=$('houses');
+    row.classList.toggle('on');
+    if(row.classList.contains('on'))buildHouseChips();
+  };
+  c.appendChild(brands);
+  const arr=document.createElement('button');
+  arr.className='chip';arr.id='arrangeBtn';
+  arr.textContent=arranging?'Done':'Arrange';
+  arr.setAttribute('aria-pressed',arranging);
+  arr.onclick=()=>{
+    arranging=!arranging;
+    document.body.classList.toggle('arrange',arranging);
+    if(arranging){
+      filter.season='';filter.vibe='';filter.kind='';filter.house='';filter.q='';
+      $('search').value='';$('houses').classList.remove('on');
+      toast('Drag the tiles. Tap Done when finished.');
+    }
+    buildChips();render();
+  };
+  c.appendChild(arr);
   SEASONS.forEach(s=>mk(s,'season',s));
   mk('Copies','kind','dupe');
   mk('Originals','kind','original');
   VIBES.forEach(v=>mk(v,'vibe',v));
+}
+function buildHouseChips(){
+  const row=$('houses');row.innerHTML='';
+  const tally={};
+  items.forEach(i=>{if(i.house)tally[i.house]=(tally[i.house]||0)+1;});
+  const names=Object.keys(tally).sort((a,b)=>a.localeCompare(b));
+  if(!names.length){row.innerHTML='<span class="lbl">No brands yet</span>';return;}
+  names.forEach(h=>{
+    const b=document.createElement('button');
+    b.className='chip house';b.textContent=h+' '+tally[h];
+    b.setAttribute('aria-pressed',filter.house===h);
+    b.onclick=()=>{
+      filter.house=filter.house===h?'':h;
+      buildChips();buildHouseChips();
+      $('houses').classList.add('on');
+      render();
+    };
+    row.appendChild(b);
+  });
 }
 
 /* ---------------- render ---------------- */
@@ -608,6 +704,7 @@ function visible(){
     if(filter.season&&!(it.seasons||[]).includes(filter.season))return false;
     if(filter.vibe&&!(it.vibes||[]).includes(filter.vibe))return false;
     if(filter.kind&&it.kind!==filter.kind)return false;
+    if(filter.house&&it.house!==filter.house)return false;
     if(q){
       const hay=[it.name,it.house,it.cloneOf,it.notes].join(' ').toLowerCase();
       if(!hay.includes(q))return false;
@@ -622,7 +719,7 @@ function render(){
   $('countLbl').textContent=items.length;
   list.forEach(it=>{
     const card=document.createElement('article');
-    card.className='card';card.tabIndex=0;
+    card.className='card';card.tabIndex=0;card.dataset.id=it.id;
     const dial=SEASONS.map(s=>`<b class="${(it.seasons||[]).includes(s)?'on':''}">${ABBR[s]}</b>`).join('');
     const img=it.photo?`<img src="${it.photo}" alt="${it.name}">`:`<div class="noshot">No photo</div>`;
     card.innerHTML=`
@@ -630,13 +727,14 @@ function render(){
         ${img}
         ${it.kind==='dupe'?'<span class="dupeflag">Copy</span>':''}
         <div class="fill"><i style="height:${it.fill==null?100:it.fill}%"></i></div>
+        <span class="grip">&#9776;</span>
       </div>
       <div class="meta">
         <div class="cname">${esc(it.name||'Untitled')}</div>
         <div class="chouse">${esc(it.house||'')}${it.kind==='dupe'&&it.cloneOf?' / of '+esc(it.cloneOf):''}</div>
         <div class="dial">${dial}</div>
       </div>`;
-    card.onclick=()=>openDetail(it.id);
+    card.onclick=()=>{if(arranging)return;openDetail(it.id);};
     card.onkeydown=e=>{if(e.key==='Enter')openDetail(it.id);};
     g.appendChild(card);
   });
@@ -842,6 +940,27 @@ $('addBtn').onclick=()=>openEditor(null);
 $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
+/* ---------------- undo snapshots ---------------- */
+/* Keeps the last 3 states before anything destructive. */
+const SNAP='shelf-snaps';
+function snapTake(label){
+  try{
+    const a=JSON.parse(localStorage.getItem(SNAP)||'[]');
+    a.unshift({when:Date.now(),label:label,items:items});
+    localStorage.setItem(SNAP,JSON.stringify(a.slice(0,3)));
+  }catch(e){}
+}
+function snapList(){try{return JSON.parse(localStorage.getItem(SNAP)||'[]');}catch(e){return [];}}
+async function snapUndo(){
+  const a=snapList();
+  if(!a.length){toast('Nothing to undo');return;}
+  const s0=a.shift();
+  try{localStorage.setItem(SNAP,JSON.stringify(a));}catch(e){}
+  items=s0.items;await save();buildLists();render();hide('menu');
+  toast('Rolled back to '+s0.items.length+' bottles');
+}
+$('mUndo')&&($('mUndo').onclick=snapUndo);
+
 /* ---------------- backup ---------------- */
 const BK='shelf-lastbackup';
 function bkName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';}
@@ -887,6 +1006,7 @@ $('bkNow').onclick=()=>{bkShare();};
 $('bkLater').onclick=()=>{try{sessionStorage.setItem('bkHush','1');}catch(e){}$('bkBar').classList.remove('on');};
 $('menuBtn').addEventListener('click',bkLabel);
 $('mSeed').onclick=async()=>{
+  snapTake('load');
   const have=new Set(items.map(b=>b.id));
   const add=SEED.filter(b=>!have.has(b.id));
   if(!add.length){toast('Already on the shelf');return;}
@@ -902,6 +1022,7 @@ $('mFile').onchange=e=>{
     try{
       const d=JSON.parse(fr.result);
       if(!d.items)throw 0;
+      snapTake('restore');
       if(items.length&&!confirm('This replaces all '+items.length+' bottles on the shelf with the '+d.items.length+' in the file. Continue?')){toast('Left alone');return;}
       items=d.items;await save();render();hide('menu');toast('Restored');
     }catch(err){toast('That file did not read');}
@@ -1231,7 +1352,7 @@ async function save(){return store.set({app:'shelf',version:1,items});}
     try{localStorage.setItem('shelf-seeded','1');}catch(e){}
     await save();
   }
-  buildChips();buildLists();render();bkBar();bkLabel();
+  buildChips();buildLists();render();dragWire();bkBar();bkLabel();
 })();
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){const open=document.querySelector('.sheet.open');if(open)hide(open.id);}
