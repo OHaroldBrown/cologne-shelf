@@ -66,9 +66,10 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
+.ratelbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
 .rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
 .rate10 button{
-  padding:11px 0;border:1px solid var(--line);border-radius:8px;background:none;
+  padding:9px 0;border:1px solid var(--line);border-radius:8px;background:none;
   color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
 .rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 .rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
@@ -79,9 +80,10 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #build{
   text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;line-height:1.9;
   color:var(--ink);opacity:.55}
-@media print{.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
+@media print{.ratelbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
+.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
 .rate10 button{
-  padding:11px 0;border:1px solid var(--line);border-radius:8px;background:none;
+  padding:9px 0;border:1px solid var(--line);border-radius:8px;background:none;
   color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
 .rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 .rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
@@ -299,7 +301,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261135</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261144</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -361,8 +363,16 @@ input[type=file]{display:none}
     <div class="field"><label>Size ml</label><input type="number" id="eSize" inputmode="numeric" placeholder="100"></div>
     <div class="field">
       <label>My rating</label>
-      <div class="rate10" id="eRate10"></div>
-      <input type="hidden" id="eRating">
+      <div class="ratelbl">Overall</div>
+      <div class="rate10" data-for="eRating"></div>
+      <div class="ratelbl">Longevity</div>
+      <div class="rate10" data-for="eLong"></div>
+      <div class="ratelbl">Projection</div>
+      <div class="rate10" data-for="eProj"></div>
+      <div class="ratelbl">Compliments</div>
+      <div class="rate10" data-for="eComp"></div>
+      <input type="hidden" id="eRating"><input type="hidden" id="eLong">
+      <input type="hidden" id="eProj"><input type="hidden" id="eComp">
     </div>
     <div class="field">
       <label>Seasons</label>
@@ -395,13 +405,17 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261135</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261144</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
+      <button class="btn wide" id="mCsvIn">Import a spreadsheet</button>
+      <button class="btn wide" id="mCsvOut">Export as a spreadsheet</button>
+      <button class="btn wide" id="mPrompt">Copy the AI prompt</button>
+      <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
       <button class="btn wide" id="mUndo">Undo the last change</button>
     </div>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
@@ -828,9 +842,12 @@ function openDetail(id){
       ${row('Size',it.size?it.size+' ml':'')}
       ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
       <div class="row" id="dRateRow" style="cursor:pointer">
-        <span class="k">My rating</span>
+        <span class="k">Overall</span>
         <span class="v txt">${it.rating?it.rating+' / 10':'tap to rate'}</span>
       </div>
+      ${row('Longevity',it.longevity?it.longevity+' / 10':'',true)}
+      ${row('Projection',it.projection?it.projection+' / 10':'',true)}
+      ${row('Compliments',it.compliments?it.compliments+' / 10':'',true)}
       ${row('Reach for it',(it.vibes||[]).join(', '),true)}
       ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
       ${row('Last worn',it.lastWorn?new Date(it.lastWorn).toLocaleDateString():'never',true)}
@@ -866,20 +883,19 @@ $('dEdit').onclick=()=>openEditor(editingId);
 
 /* ---------------- editor ---------------- */
 function buildRate10(){
-  const box=$('eRate10');if(!box)return;
-  const cur=Number($('eRating').value)||0;
-  box.innerHTML='';
-  for(let n=1;n<=10;n++){
-    const b=document.createElement('button');
-    b.type='button';b.textContent=n;
-    b.setAttribute('aria-pressed',cur===n);
-    if(cur&&n<cur)b.className='lit';
-    b.onclick=()=>{
-      $('eRating').value = (Number($('eRating').value)===n) ? '' : n;
-      buildRate10();
-    };
-    box.appendChild(b);
-  }
+  document.querySelectorAll('.rate10[data-for]').forEach(box=>{
+    const fld=$(box.dataset.for);if(!fld)return;
+    const cur=Number(fld.value)||0;
+    box.innerHTML='';
+    for(let n=1;n<=10;n++){
+      const b=document.createElement('button');
+      b.type='button';b.textContent=n;
+      b.setAttribute('aria-pressed',cur===n);
+      if(cur&&n<cur)b.className='lit';
+      b.onclick=()=>{fld.value=(Number(fld.value)===n)?'':n;buildRate10();};
+      box.appendChild(b);
+    }
+  });
 }
 function pickerRow(el,options,selected){
   el.innerHTML='';
@@ -907,6 +923,9 @@ function openEditor(id){
   $('eRetail').value=it&&it.retail!=null?it.retail:'';
   $('eSize').value=it&&it.size!=null?it.size:'';
   $('eRating').value=it&&it.rating!=null?it.rating:'';
+  $('eLong').value=it&&it.longevity!=null?it.longevity:'';
+  $('eProj').value=it&&it.projection!=null?it.projection:'';
+  $('eComp').value=it&&it.compliments!=null?it.compliments:'';
   buildRate10();
   $('eNotes').value=it?it.notes||'':'';
   $('eComment').value=it?it.comment||'':'';
@@ -999,6 +1018,9 @@ $('eSave').onclick=async()=>{
     retail:$('eRetail').value===''?null:Number($('eRetail').value),
     size:$('eSize').value===''?null:Number($('eSize').value),
     rating:$('eRating').value===''?null:Math.max(0,Math.min(10,Number($('eRating').value))),
+    longevity:$('eLong').value===''?null:Math.max(0,Math.min(10,Number($('eLong').value))),
+    projection:$('eProj').value===''?null:Math.max(0,Math.min(10,Number($('eProj').value))),
+    compliments:$('eComp').value===''?null:Math.max(0,Math.min(10,Number($('eComp').value))),
     seasons:readPicker($('eSeasons')),
     vibes:readPicker($('eVibes')),
     fill:Number($('eFill').value),
@@ -1331,7 +1353,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261135';
+const BUILD='0809261144';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1345,6 +1367,137 @@ async function checkBuild(){
     }
   }catch(e){}
 }
+
+
+/* ---------------- spreadsheet in and out ---------------- */
+const COLS=['name','house','kind','cloneOf','paid','retail','size','rating','longevity',
+            'projection','compliments','seasons','vibes','notes','comment','fill'];
+
+function csvParse(text){
+  const rows=[];let row=[],cell='',q=false;
+  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}
+      else if(c==='"')q=false;
+      else cell+=c;
+    }else{
+      if(c==='"')q=true;
+      else if(c===','){row.push(cell);cell='';}
+      else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+      else cell+=c;
+    }
+  }
+  if(cell.length||row.length){row.push(cell);rows.push(row);}
+  return rows.filter(r=>r.some(x=>String(x).trim()!==''));
+}
+function csvCell(v){
+  const t=v==null?'':String(v);
+  return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+}
+function csvOut(){
+  const head=COLS.join(',');
+  const body=items.map(b=>COLS.map(c=>{
+    if(c==='seasons'||c==='vibes')return csvCell((b[c]||[]).join('; '));
+    return csvCell(b[c]==null?'':b[c]);
+  }).join(',')).join('\n');
+  const blob=new Blob([head+'\n'+body],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='fragrance-shelf-'+bkStampText()+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('Spreadsheet saved');
+}
+const NUMF=['paid','retail','size','rating','longevity','projection','compliments','fill'];
+function csvIn(text){
+  const rows=csvParse(text);
+  if(rows.length<2){toast('Nothing to read in that file');return;}
+  const head=rows[0].map(h=>h.trim().toLowerCase().replace(/[^a-z]/g,''));
+  const idx={};
+  COLS.forEach(c=>{
+    const want=c.toLowerCase();
+    let i=head.indexOf(want);
+    if(i<0&&want==='cloneof')i=head.indexOf('copyof');
+    if(i<0&&want==='comment')i=head.indexOf('comments');
+    if(i<0&&want==='vibes')i=head.indexOf('occasions');
+    if(i>=0)idx[c]=i;
+  });
+  if(idx.name==null){toast('That file needs a name column');return;}
+
+  snapTake('spreadsheet');
+  let added=0, updated=0;
+  rows.slice(1).forEach(r=>{
+    const get=c=>idx[c]==null?'':String(r[idx[c]]==null?'':r[idx[c]]).trim();
+    const nm=get('name');if(!nm)return;
+    const hs=get('house');
+    let b=items.find(x=>(x.name||'').toLowerCase()===nm.toLowerCase()
+                     &&(x.house||'').toLowerCase()===hs.toLowerCase());
+    const isNew=!b;
+    if(isNew){b={id:'cs'+Math.random().toString(36).slice(2,10),name:nm,house:hs,
+      kind:'original',cloneOf:'',paid:null,retail:null,size:null,rating:null,
+      longevity:null,projection:null,compliments:null,seasons:[],vibes:[],
+      fill:100,notes:'',comment:'',photo:null,wears:0,lastWorn:null};items.push(b);added++;}
+    else updated++;
+
+    if(idx.house!=null&&hs)b.house=hs;
+    const kind=get('kind').toLowerCase();
+    if(kind)b.kind=(kind.startsWith('d')||kind.startsWith('c'))?'dupe':'original';
+    if(get('cloneOf')){b.cloneOf=get('cloneOf');b.kind='dupe';}
+    NUMF.forEach(f=>{const v=get(f);if(v!=='')b[f]=Number(v.replace(/[^0-9.\-]/g,''))||0;});
+    ['seasons','vibes'].forEach(f=>{
+      const v=get(f);
+      if(v)b[f]=v.split(/[;|,]/).map(x=>x.trim()).filter(Boolean)
+        .map(x=>x.charAt(0).toUpperCase()+x.slice(1).toLowerCase());
+    });
+    if(get('notes'))b.notes=get('notes');
+    if(get('comment'))b.comment=get('comment');
+  });
+  save().then(()=>{buildLists();render();hide('menu');
+    toast(added+' added, '+updated+' updated');});
+}
+$('mCsvOut').onclick=csvOut;
+$('mCsvIn').onclick=()=>$('mCsvFile').click();
+$('mCsvFile').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=()=>{csvIn(String(fr.result));e.target.value='';};
+  fr.readAsText(f);
+};
+const AIPROMPT=`I am filling in a fragrance collection tracker. Below is my list of bottles.
+Return ONLY a CSV, no commentary, no code fences, with exactly this header row:
+
+name,house,kind,cloneOf,paid,retail,size,rating,longevity,projection,compliments,seasons,vibes,notes,comment,fill
+
+Rules for each column:
+name        the fragrance name without the house
+house       the brand that makes it
+kind        original, or dupe if it is a clone of another fragrance
+cloneOf     if kind is dupe, the full name of the fragrance it copies, house included. Leave blank for originals.
+paid        leave blank, I fill this in
+retail      current US list price of the ORIGINAL in dollars, digits only
+size        bottle size in ml if I gave it, otherwise blank
+rating      leave blank
+longevity   leave blank
+projection  leave blank
+compliments leave blank
+seasons     any of Spring, Summer, Fall, Winter, separated by semicolons
+vibes       any of Office, Night, Date, Casual, Dressy, Travel, separated by semicolons
+notes       the main accords and notes, comma separated, for example: pineapple, bergamot, birch, smoky woods
+comment     leave blank
+fill        100
+
+Keep the notes column factual and scent focused, it drives layering suggestions.
+If you are unsure of a value, leave the cell blank rather than guessing.
+
+My bottles:
+`;
+$('mPrompt').onclick=async()=>{
+  try{await navigator.clipboard.writeText(AIPROMPT);toast('Prompt copied. Paste it into any AI.');}
+  catch(e){
+    const t=document.createElement('textarea');t.value=AIPROMPT;document.body.appendChild(t);
+    t.select();document.execCommand('copy');t.remove();toast('Prompt copied');
+  }
+};
 
 /* ---------------- undo snapshots ---------------- */
 /* Keeps the last 3 states before anything destructive. */
