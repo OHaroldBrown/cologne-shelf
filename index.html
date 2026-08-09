@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#E7ECEA">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="The Shelf">
-<title>The Shelf</title>
+<meta name="apple-mobile-web-app-title" content="The Fragrance Shelf">
+<title>The Fragrance Shelf</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230C1416'/%3E%3Crect x='24' y='8' width='16' height='10' fill='%234FD1C5'/%3E%3Crect x='18' y='18' width='28' height='38' rx='3' fill='%234FD1C5'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C1416'/%3E%3Crect x='68' y='24' width='44' height='28' fill='%234FD1C5'/%3E%3Crect x='50' y='52' width='80' height='106' rx='8' fill='%234FD1C5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,10 +61,16 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
+#stNote{
+  text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
+#stNote:empty{display:none}
 #build{
   text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;line-height:1.9;
   color:var(--ink);opacity:.55}
-@media print{#build{opacity:1}}
+@media print{#stNote{
+  text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
+#stNote:empty{display:none}
+#build{opacity:1}}
 /* ---------- header ---------- */
 header{
   position:sticky;top:0;z-index:40;background:var(--glass);
@@ -72,7 +78,9 @@ header{
   padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;
 }
 .brandrow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
-.brand{font-size:30px;line-height:.95}
+.brand{font-size:30px;line-height:.95;white-space:nowrap}
+@media(max-width:430px){.brand{font-size:23px}}
+@media(max-width:360px){.brand{font-size:20px}}
 .brand em{font-style:italic;font-weight:400}
 .count{font-size:20px;font-weight:700;padding-bottom:2px;letter-spacing:0}
 .iconbtn{
@@ -258,7 +266,7 @@ input[type=file]{display:none}
 
 <header>
   <div class="brandrow">
-    <h1 class="brand disp">The <em>Shelf</em></h1>
+    <h1 class="brand disp">The <em>Fragrance Shelf</em></h1>
     <div class="tools">
       <span class="count mono" id="countLbl">0</span>
       <button class="iconbtn" id="themeBtn" title="Light or dark" aria-label="Light or dark">☀</button>
@@ -277,9 +285,10 @@ input[type=file]{display:none}
   <div><span class="v" id="stRetail">$0</span><span class="k">Retail</span></div>
   <div><span class="v" id="stSaved">$0</span><span class="k">Saved</span></div>
 </div>
+<p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261041</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261047</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -373,7 +382,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261041</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261047</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -780,12 +789,17 @@ function render(){
     card.onkeydown=e=>{if(e.key==='Enter')openDetail(it.id);};
     g.appendChild(card);
   });
-  const paid=items.reduce((a,b)=>a+(Number(b.paid)||0),0);
-  const retail=items.reduce((a,b)=>a+(Number(b.retail)||Number(b.paid)||0),0);
+  /* only count a bottle once we know what it cost */
+  const priced=items.filter(b=>b.paid!=null&&b.paid!=='' );
+  const paid=priced.reduce((a,b)=>a+(Number(b.paid)||0),0);
+  const retail=priced.reduce((a,b)=>a+(Number(b.retail)||Number(b.paid)||0),0);
+  const missing=items.length-priced.length;
   $('stBottles').textContent=items.length;
   $('stPaid').textContent=money(paid);
-  $('stRetail').textContent=money(retail);
+  $('stRetail').textContent=money(items.reduce((a,b)=>a+(Number(b.retail)||0),0));
   $('stSaved').textContent=money(Math.max(0,retail-paid));
+  const note=$('stNote');
+  if(note)note.textContent=missing?missing+' without a price yet':'';
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
@@ -793,7 +807,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','
 function openDetail(id){
   const it=items.find(x=>x.id===id);if(!it)return;
   editingId=id;
-  const saved=(Number(it.retail)||0)-(Number(it.paid)||0);
+  const known=it.paid!=null&&it.paid!=='';
+  const saved=known?(Number(it.retail)||0)-(Number(it.paid)||0):0;
   const row=(k,v,txt)=>v?`<div class="row"><span class="k">${k}</span><span class="v ${txt?'txt':''}">${esc(v)}</span></div>`:'';
   $('dBody').innerHTML=`
     ${it.photo?`<img class="hero" src="${it.photo}" alt="${esc(it.name)}">`:''}
@@ -802,11 +817,11 @@ function openDetail(id){
     <div class="dial" style="margin-top:12px">${SEASONS.map(s=>`<b class="${(it.seasons||[]).includes(s)?'on':''}">${ABBR[s]}</b>`).join('')}</div>
     <div class="rows">
       ${it.kind==='dupe'?row('Copy of',it.cloneOf||'not noted',true):row('Status','The original',true)}
-      ${row('Paid',money(it.paid))}
-      ${it.kind==='dupe'&&saved>0?row('Under retail',money(saved)+'  ('+Math.round((1-(it.paid/it.retail))*100)+'% off)'):''}
+      ${known?row('Paid',money(it.paid)):row('Paid','not recorded',true)}
+      ${it.kind==='dupe'&&known&&saved>0&&it.retail?row('Under retail',money(saved)+'  ('+Math.round((1-(it.paid/it.retail))*100)+'% off)'):''}
       ${row('Retail',it.retail?money(it.retail):'')}
       ${row('Size',it.size?it.size+' ml':'')}
-      ${row('Cost per ml',it.paid&&it.size?'$'+(it.paid/it.size).toFixed(2):'')}
+      ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
       ${row('Rating',it.rating?'★'.repeat(it.rating)+'☆'.repeat(5-it.rating):'',true)}
       ${row('Reach for it',(it.vibes||[]).join(', '),true)}
       ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
@@ -1270,7 +1285,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261041';
+const BUILD='0809261047';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1308,11 +1323,18 @@ $('mUndo')&&($('mUndo').onclick=snapUndo);
 
 /* ---------------- backup ---------------- */
 const BK='shelf-lastbackup';
+const DIRTY='shelf-dirty';
+function dirtyCount(){try{return Number(localStorage.getItem(DIRTY)||0);}catch(e){return 0;}}
+function dirtyBump(){
+  try{localStorage.setItem(DIRTY,String(dirtyCount()+1));}catch(e){}
+  bkBar();
+}
+function dirtyClear(){try{localStorage.setItem(DIRTY,'0');}catch(e){}}
 function bkName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';}
 /* Chrome Android blocks .json through the share sheet, so share it as text */
 function bkShareName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.txt';}
 function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items,blends},null,2)],{type:'application/json'});}
-function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}bkBar();bkLabel();}
+function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}dirtyClear();bkBar();bkLabel();}
 function bkAge(){try{const t=Number(localStorage.getItem(BK)||0);return t?Math.floor((Date.now()-t)/86400000):null;}catch(e){return null;}}
 function bkLabel(){
   const d=bkAge();
@@ -1320,9 +1342,12 @@ function bkLabel(){
     d===0 ? 'Last backup, today.' : d===1 ? 'Last backup, yesterday.' : 'Last backup, '+d+' days ago.';
 }
 function bkBar(){
-  const d=bkAge(), bar=$('bkBar');
+  const d=bkAge(), bar=$('bkBar'), n=dirtyCount();
+  $('bkNow').textContent='Back up';
+  $('bkNow').onclick=()=>{bkShare();};
   if(!items.length||sessionStorage.getItem('bkHush')){bar.classList.remove('on');return;}
   if(d===null){$('bkMsg').textContent='No backup yet. Send one to Drive.';bar.classList.add('on');}
+  else if(n>=4){$('bkMsg').textContent=n+' changes since your last backup.';bar.classList.add('on');}
   else if(d>=7){$('bkMsg').textContent='Last backup was '+d+' days ago.';bar.classList.add('on');}
   else bar.classList.remove('on');
 }
@@ -1368,7 +1393,11 @@ $('mFile').onchange=e=>{
 $('search').oninput=e=>{filter.q=e.target.value;render();};
 
 /* ---------------- boot ---------------- */
-async function save(){return store.set({app:'shelf',version:1,items,blends});}
+async function save(){
+  const r=await store.set({app:'shelf',version:1,items,blends});
+  try{dirtyBump();}catch(e){}
+  return r;
+}
 (async function init(){
   try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
   const data=await store.get();
