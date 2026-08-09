@@ -327,6 +327,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
+      <button class="btn wide" id="mSeed">Load my 7 bottles</button>
     </div>
     <input type="file" id="mFile" accept="application/json">
     <p class="lbl" style="margin-top:24px">Add to home screen</p>
@@ -880,6 +881,14 @@ $('mExport').onclick=()=>{bkDownload();};
 $('bkNow').onclick=()=>{bkShare();};
 $('bkLater').onclick=()=>{try{sessionStorage.setItem('bkHush','1');}catch(e){}$('bkBar').classList.remove('on');};
 $('menuBtn').addEventListener('click',bkLabel);
+$('mSeed').onclick=async()=>{
+  const have=new Set(items.map(b=>b.id));
+  const add=SEED.filter(b=>!have.has(b.id));
+  if(!add.length){toast('Already on the shelf');return;}
+  items=items.concat(JSON.parse(JSON.stringify(add)));
+  try{localStorage.setItem('shelf-seeded','1');}catch(e){}
+  await save();buildLists();render();hide('menu');toast('Added '+add.length);
+};
 $('mImport').onclick=()=>$('mFile').click();
 $('mFile').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
@@ -895,12 +904,202 @@ $('mFile').onchange=e=>{
 };
 $('search').oninput=e=>{filter.q=e.target.value;render();};
 
+/* ---------------- seed ----------------
+   Harold's shelf. Loads once, only when the app has nothing in it. */
+const SEED=[
+ {
+  "id": "sd-king",
+  "name": "King",
+  "house": "Bharara",
+  "kind": "dupe",
+  "cloneOf": "Xerjoff Erba Pura",
+  "paid": null,
+  "retail": 237,
+  "size": 100,
+  "rating": null,
+  "seasons": [
+   "Fall",
+   "Winter"
+  ],
+  "vibes": [
+   "Night",
+   "Date"
+  ],
+  "fill": 100,
+  "notes": "Blackcurrant, cinnamon, honey, amber, tobacco, vanilla",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-ineff",
+  "name": "Ineffable",
+  "house": "Oakcha",
+  "kind": "dupe",
+  "cloneOf": "Creed Aventus",
+  "paid": null,
+  "retail": 335,
+  "size": 50,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer",
+   "Fall"
+  ],
+  "vibes": [
+   "Office",
+   "Night",
+   "Date",
+   "Dressy"
+  ],
+  "fill": 100,
+  "notes": "Pineapple, bergamot, blackcurrant, birch, smoky woods, musk",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-carib",
+  "name": "Caribbean Waters",
+  "house": "The Dua Brand",
+  "kind": "dupe",
+  "cloneOf": "Creed Virgin Island Water",
+  "paid": null,
+  "retail": 360,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Summer"
+  ],
+  "vibes": [
+   "Casual",
+   "Travel"
+  ],
+  "fill": 100,
+  "notes": "Lime, coconut, white rum, ginger, sugar cane",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-imag",
+  "name": "Imagine",
+  "house": "The Dua Brand",
+  "kind": "dupe",
+  "cloneOf": "Louis Vuitton Imagination",
+  "paid": null,
+  "retail": 320,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer",
+   "Fall"
+  ],
+  "vibes": [
+   "Office",
+   "Casual",
+   "Date",
+   "Travel"
+  ],
+  "fill": 100,
+  "notes": "Bergamot, citrus, black tea, ginger, ambroxan, sandalwood",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-melt",
+  "name": "Melting Embers",
+  "house": "Oakcha",
+  "kind": "dupe",
+  "cloneOf": "Maison Margiela By the Fireplace",
+  "paid": null,
+  "retail": 140,
+  "size": 50,
+  "rating": null,
+  "seasons": [
+   "Fall",
+   "Winter"
+  ],
+  "vibes": [
+   "Casual",
+   "Night"
+  ],
+  "fill": 100,
+  "notes": "Chestnut, clove, smoke, vanilla, guaiac wood",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-noct",
+  "name": "Nocturno Elixir",
+  "house": "Rayhaan",
+  "kind": "dupe",
+  "cloneOf": "Chanel Bleu de Chanel L Exclusif",
+  "paid": null,
+  "retail": 275,
+  "size": 100,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer",
+   "Fall",
+   "Winter"
+  ],
+  "vibes": [
+   "Office",
+   "Dressy",
+   "Date"
+  ],
+  "fill": 100,
+  "notes": "Citrus, incense, cedar, sandalwood, amber",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-wood",
+  "name": "Woody Sandalwood",
+  "house": "Dossier",
+  "kind": "dupe",
+  "cloneOf": "Le Labo Santal 33",
+  "paid": null,
+  "retail": 385,
+  "size": 50,
+  "rating": null,
+  "seasons": [
+   "Fall",
+   "Winter",
+   "Spring"
+  ],
+  "vibes": [
+   "Casual",
+   "Office",
+   "Dressy"
+  ],
+  "fill": 100,
+  "notes": "Violet leaf, cardamom, orris, ambrox, cedar, sandalwood, musk",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ }
+];
+
 /* ---------------- boot ---------------- */
 async function save(){return store.set({app:'shelf',version:1,items});}
 (async function init(){
   try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
   const data=await store.get();
   items=(data&&data.items)||[];
+  let seeded=false;
+  try{seeded=localStorage.getItem('shelf-seeded')==='1';}catch(e){}
+  if(!items.length&&!seeded){
+    items=JSON.parse(JSON.stringify(SEED));
+    try{localStorage.setItem('shelf-seeded','1');}catch(e){}
+    await save();
+  }
   buildChips();buildLists();render();bkBar();bkLabel();
 })();
 document.addEventListener('keydown',e=>{
