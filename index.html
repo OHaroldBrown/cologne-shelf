@@ -66,13 +66,15 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
+.hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
 #stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
 #stNote:empty{display:none}
 #build{
   text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;line-height:1.9;
   color:var(--ink);opacity:.55}
-@media print{#stNote{
+@media print{.hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
+#stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
 #stNote:empty{display:none}
 #build{opacity:1}}
@@ -287,7 +289,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261057</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261108</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -348,7 +350,7 @@ input[type=file]{display:none}
     </div>
     <div class="two">
       <div class="field"><label>Size ml</label><input type="number" id="eSize" inputmode="numeric" placeholder="100"></div>
-      <div class="field"><label>Rating 1 to 5</label><input type="number" id="eRating" min="0" max="5" inputmode="numeric" placeholder="4"></div>
+      <div class="field"><label>My rating, 1 to 10</label><input type="number" id="eRating" min="0" max="10" inputmode="numeric" placeholder="8"></div>
     </div>
     <div class="field">
       <label>Seasons</label>
@@ -362,7 +364,9 @@ input[type=file]{display:none}
       <label>Bottle left <span class="mono" id="eFillVal">100%</span></label>
       <input type="range" id="eFill" min="0" max="100" step="5" value="100">
     </div>
-    <div class="field"><label>Notes</label><textarea id="eNotes" placeholder="Smoky pineapple. Lasts about six hours on skin. Two sprays is plenty."></textarea></div>
+    <div class="field"><label>Notes and accords</label><textarea id="eNotes" placeholder="Pineapple, bergamot, birch, smoky woods"></textarea>
+      <p class="hint">These drive the layering suggestions, so keep them scent notes.</p></div>
+    <div class="field"><label>My comments</label><textarea id="eComment" placeholder="Gets compliments every time. Lasts about six hours. Two sprays is plenty."></textarea></div>
     <div class="actions">
       <button class="btn warn wide" id="eDelete" style="display:none">Delete this bottle</button>
     </div>
@@ -379,7 +383,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261057</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261108</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -812,12 +816,13 @@ function openDetail(id){
       ${row('Retail',it.retail?money(it.retail):'')}
       ${row('Size',it.size?it.size+' ml':'')}
       ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
-      ${row('Rating',it.rating?'★'.repeat(it.rating)+'☆'.repeat(5-it.rating):'',true)}
+      ${row('My rating',it.rating?it.rating+' / 10':'',true)}
       ${row('Reach for it',(it.vibes||[]).join(', '),true)}
       ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
       ${row('Last worn',it.lastWorn?new Date(it.lastWorn).toLocaleDateString():'never',true)}
       ${row('Times worn',it.wears||0)}
-      ${it.notes?`<div class="row" style="display:block"><span class="k">Notes</span><p style="margin:8px 0 0">${esc(it.notes)}</p></div>`:''}
+      ${it.notes?`<div class="row" style="display:block"><span class="k">Notes and accords</span><p style="margin:8px 0 0">${esc(it.notes)}</p></div>`:''}
+      ${it.comment?`<div class="row" style="display:block"><span class="k">My comments</span><p style="margin:8px 0 0;white-space:pre-wrap">${esc(it.comment)}</p></div>`:''}
     </div>
     <div class="actions">
       <button class="btn solid wide" id="dWore">Wearing it today</button>
@@ -867,6 +872,7 @@ function openEditor(id){
   $('eSize').value=it&&it.size!=null?it.size:'';
   $('eRating').value=it&&it.rating!=null?it.rating:'';
   $('eNotes').value=it?it.notes||'':'';
+  $('eComment').value=it?it.comment||'':'';
   $('eFill').value=it&&it.fill!=null?it.fill:100;
   $('eFillVal').textContent=$('eFill').value+'%';
   pickerRow($('eSeasons'),SEASONS,it?it.seasons||[]:[]);
@@ -955,11 +961,12 @@ $('eSave').onclick=async()=>{
     paid:$('ePaid').value===''?null:Number($('ePaid').value),
     retail:$('eRetail').value===''?null:Number($('eRetail').value),
     size:$('eSize').value===''?null:Number($('eSize').value),
-    rating:$('eRating').value===''?null:Math.max(0,Math.min(5,Number($('eRating').value))),
+    rating:$('eRating').value===''?null:Math.max(0,Math.min(10,Number($('eRating').value))),
     seasons:readPicker($('eSeasons')),
     vibes:readPicker($('eVibes')),
     fill:Number($('eFill').value),
     notes:$('eNotes').value.trim(),
+    comment:$('eComment').value.trim(),
     photo:pendingPhoto
   };
   const old=items.find(x=>x.id===rec.id);
@@ -1177,7 +1184,7 @@ function openLayers(){
     return `<div class="lay">
       <h4>${esc(b.name)}</h4>
       <p class="why">${esc(parts.join(' + '))}${b.ratio?' &middot; '+esc(b.ratio):''}</p>
-      <p class="ord">${b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'not rated'} &middot; worn ${b.wears||0}${b.lastWorn?' &middot; last '+new Date(b.lastWorn).toLocaleDateString():''}</p>
+      <p class="ord">${b.rating?b.rating+' / 10':'not rated'} &middot; worn ${b.wears||0}${b.lastWorn?' &middot; last '+new Date(b.lastWorn).toLocaleDateString():''}</p>
       ${b.note?'<p class="why">'+esc(b.note)+'</p>':''}
       <div class="mini">
         <button data-wore="${b.id}">Wore it</button>
@@ -1214,9 +1221,9 @@ function openLayers(){
   });
   body.querySelectorAll('[data-rate]').forEach(b=>b.onclick=async()=>{
     const bl=blends.find(x=>x.id===b.dataset.rate);if(!bl)return;
-    const v=prompt('Rate this blend 1 to 5, blank to clear',bl.rating||'');
+    const v=prompt('Rate this blend 1 to 10, blank to clear',bl.rating||'');
     if(v===null)return;
-    bl.rating=v?Math.max(1,Math.min(5,Number(v)||0)):null;
+    bl.rating=v?Math.max(1,Math.min(10,Number(v)||0)):null;
     await save();openLayers();
   });
   body.querySelectorAll('[data-ratio]').forEach(b=>b.onclick=async()=>{
@@ -1287,7 +1294,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261057';
+const BUILD='0809261108';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
