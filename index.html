@@ -2,6 +2,9 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E7ECEA">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -254,7 +257,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809260936</div>
+<div id="build">BUILD 0809260949</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -340,7 +343,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809260936</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809260949</p>
     <div class="actions">
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
@@ -946,6 +949,22 @@ $('addBtn').onclick=()=>openEditor(null);
 $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
+/* ---------------- version check ---------------- */
+const BUILD='0809260949';
+async function checkBuild(){
+  try{
+    const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
+    const t=await r.text();
+    const m=t.match(/BUILD (\d{10})/);
+    if(m&&m[1]!==BUILD){
+      $('bkMsg').textContent='New version '+m[1]+' is ready.';
+      $('bkNow').textContent='Reload';
+      $('bkNow').onclick=()=>location.replace(location.pathname+'?v='+m[1]);
+      $('bkBar').classList.add('on');
+    }
+  }catch(e){}
+}
+
 /* ---------------- undo snapshots ---------------- */
 /* Keeps the last 3 states before anything destructive. */
 const SNAP='shelf-snaps';
@@ -1351,14 +1370,7 @@ async function save(){return store.set({app:'shelf',version:1,items});}
   try{const t=localStorage.getItem('shelf-theme');if(t)setTheme(t);}catch(e){}
   const data=await store.get();
   items=(data&&data.items)||[];
-  let seeded=false;
-  try{seeded=localStorage.getItem('shelf-seeded')==='1';}catch(e){}
-  if(!items.length&&!seeded){
-    items=JSON.parse(JSON.stringify(SEED));
-    try{localStorage.setItem('shelf-seeded','1');}catch(e){}
-    await save();
-  }
-  buildChips();buildLists();render();dragWire();bkBar();bkLabel();
+  buildChips();buildLists();render();dragWire();bkBar();bkLabel();checkBuild();
 })();
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){const open=document.querySelector('.sheet.open');if(open)hide(open.id);}
