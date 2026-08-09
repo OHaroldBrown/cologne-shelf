@@ -301,7 +301,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261127</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261133</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -397,7 +397,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261127</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261133</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -1334,7 +1334,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261127';
+const BUILD='0809261133';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1415,7 +1415,7 @@ async function bkShare(){
   const file=new File([txt],bkShareName(),{type:'text/plain'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{
-      await navigator.share({files:[file],title:'Cologne shelf backup'});
+      await navigator.share({files:[file],title:bkShareName()});
       bkStamp();toast('Sent');return;
     }catch(e){
       if(e&&e.name==='AbortError')return;
