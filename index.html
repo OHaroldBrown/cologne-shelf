@@ -58,6 +58,10 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
+#build{
+  text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;
+  color:var(--ink);opacity:.55}
+@media print{#build{opacity:1}}
 /* ---------- header ---------- */
 header{
   position:sticky;top:0;z-index:40;background:var(--glass);
@@ -250,6 +254,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
+<div id="build">BUILD 0809260936</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -335,6 +340,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809260936</p>
     <div class="actions">
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
