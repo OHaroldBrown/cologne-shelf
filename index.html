@@ -257,7 +257,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809261005</div>
+<div id="build">BUILD 0809261011</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -343,14 +343,12 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261005</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261011</p>
     <div class="actions">
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
-      <button class="btn wide" id="mLink">Load my shelf from a link</button>
-      <button class="btn wide" id="mLinkSet">Change that link</button>
       <button class="btn wide" id="mUndo">Undo the last change</button>
     </div>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
@@ -951,7 +949,7 @@ $('menuBtn').onclick=()=>show('menu');
 $('mClose').onclick=()=>hide('menu');
 $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
 /* ---------------- version check ---------------- */
-const BUILD='0809261005';
+const BUILD='0809261011';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -965,35 +963,6 @@ async function checkBuild(){
     }
   }catch(e){}
 }
-
-/* ---------------- load from a link ---------------- */
-const LNK='shelf-link';
-function linkGet(){try{return localStorage.getItem(LNK)||'';}catch(e){return '';}}
-function linkSet(){
-  const cur=linkGet();
-  const v=prompt('Paste the raw URL of your shelf backup. Leave blank to forget it.',cur);
-  if(v===null)return;
-  try{v.trim()?localStorage.setItem(LNK,v.trim()):localStorage.removeItem(LNK);}catch(e){}
-  toast(v.trim()?'Link saved':'Link cleared');
-}
-async function linkLoad(){
-  let u=linkGet();
-  if(!u){linkSet();u=linkGet();if(!u)return;}
-  toast('Fetching');
-  try{
-    const r=await fetch(u,{cache:'no-store'});
-    if(!r.ok)throw 0;
-    const d=await r.json();
-    if(!d.items||!Array.isArray(d.items))throw 0;
-    if(items.length&&!confirm('This replaces all '+items.length+' bottles with the '+d.items.length+' at that link. Continue?'))
-      {toast('Left alone');return;}
-    snapTake('link');
-    items=d.items;await save();buildLists();render();hide('menu');
-    toast('Loaded '+items.length);
-  }catch(e){toast('That link did not load');}
-}
-$('mLink')&&($('mLink').onclick=linkLoad);
-$('mLinkSet')&&($('mLinkSet').onclick=linkSet);
 
 /* ---------------- undo snapshots ---------------- */
 /* Keeps the last 3 states before anything destructive. */
