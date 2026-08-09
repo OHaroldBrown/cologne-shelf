@@ -99,6 +99,13 @@ header{
   background:var(--accent);color:var(--onAccent);padding:2px 7px;border-radius:20px;margin-bottom:6px}
 .lay .mini{display:flex;gap:6px;margin-top:6px}
 .lay .mini button{flex:1;font-size:13px;padding:7px;border:1px solid var(--line);border-radius:8px;background:none}
+#builder{display:none;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px;background:var(--panel)}
+#builder.on{display:block}
+#builder .pickrow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+#builder .pickrow button{font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:20px;background:none;text-align:left}
+#builder .pickrow button[aria-pressed="true"]{background:var(--ink);color:var(--glass);border-color:var(--ink)}
+#builder input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--glass);margin-bottom:8px}
+#builder .verdict{font-size:13px;opacity:.85;margin:0 0 10px;min-height:18px}
 .chip.house{border-style:dashed}
 .card.dragging{opacity:.4}
 .card.over{outline:2px dashed var(--accent);outline-offset:2px}
@@ -267,7 +274,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809261030</div>
+<div id="build">BUILD 0809261035</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -361,7 +368,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261030</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261035</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -1157,12 +1164,22 @@ function openLayers(){
     </div>`;}).join(''):'<p style="opacity:.7">No saved blends yet. Save one from the suggestions below.</p>';
 
   body.innerHTML=`
+    <button class="btn wide" id="bOpen" style="margin-bottom:14px">Build your own blend</button>
+    <div id="builder">
+      <strong>Pick two or three</strong>
+      <div class="pickrow" id="bPick"></div>
+      <p class="verdict" id="bVerdict"></p>
+      <input id="bName" placeholder="Name it">
+      <input id="bRatio" placeholder="How you spray it, for example 2 sprays of the first and 1 of the second">
+      <div class="mini"><button id="bSave">Save blend</button><button id="bCancel">Cancel</button></div>
+    </div>
     <h3 class="disp" style="margin:0 0 10px">Your blends</h3>
     ${blendHtml}
     <h3 class="disp" style="margin:22px 0 10px">Best pairs on your shelf</h3>
     ${top.map(r=>layCard(r,r.anchor)).join('')}`;
 
   wireSave(body);
+  buildWire();
   body.querySelectorAll('[data-wore]').forEach(b=>b.onclick=async()=>{
     const bl=blends.find(x=>x.id===b.dataset.wore);if(!bl)return;
     bl.wears=(bl.wears||0)+1;bl.lastWorn=Date.now();
@@ -1191,11 +1208,62 @@ function openLayers(){
   });
   show('layers');
 }
+let bSel=[];
+function buildWire(){
+  const open=$('bOpen'), box=$('builder');
+  if(!open)return;
+  open.onclick=()=>{bSel=[];box.classList.add('on');buildPicks();open.style.display='none';};
+  $('bCancel').onclick=()=>{box.classList.remove('on');open.style.display='';};
+  $('bSave').onclick=async()=>{
+    if(bSel.length<2){toast('Pick at least two');return;}
+    const names=bSel.map(id=>(items.find(x=>x.id===id)||{}).name).filter(Boolean);
+    const nm=($('bName').value||'').trim()||names.join(' + ');
+    const key=bSel.slice().sort().join();
+    if(blends.some(b=>b.ids.slice().sort().join()===key)){toast('You already saved that one');return;}
+    blends.push({id:'bl'+Date.now().toString(36),name:nm,ids:bSel.slice(),
+      ratio:($('bRatio').value||'').trim(),rating:null,wears:0,lastWorn:null,note:''});
+    await save();toast('Saved');openLayers();
+  };
+  buildPicks();
+}
+function buildPicks(){
+  const row=$('bPick');if(!row)return;
+  row.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button');
+    b.textContent=it.name;
+    b.setAttribute('aria-pressed',bSel.includes(it.id));
+    b.onclick=()=>{
+      if(bSel.includes(it.id))bSel=bSel.filter(x=>x!==it.id);
+      else if(bSel.length>=3){toast('Three is the limit');return;}
+      else bSel.push(it.id);
+      buildPicks();buildVerdict();
+    };
+    row.appendChild(b);
+  });
+  buildVerdict();
+}
+function buildVerdict(){
+  const v=$('bVerdict');if(!v)return;
+  if(bSel.length<2){v.textContent='';return;}
+  const picked=bSel.map(id=>items.find(x=>x.id===id)).filter(Boolean);
+  const rs=[];
+  for(let i=0;i<picked.length;i++)for(let j=i+1;j<picked.length;j++){
+    const r=pairScore(picked[i],picked[j]);
+    if(r){const c=curatedFor(picked[i],picked[j]);if(c){r.score=Math.min(100,r.score+14);r.curated=c;}
+      r.pairName=picked[i].name+' and '+picked[j].name;rs.push(r);}
+  }
+  if(!rs.length){v.textContent='Not enough notes on these to judge it.';return;}
+  const avg=Math.round(rs.reduce((a,b)=>a+b.score,0)/rs.length);
+  const worst=rs.slice().sort((a,b)=>a.score-b.score)[0];
+  let verdict = avg>=70?'Strong combination.' : avg>=45?'Should work.' : 'Risky.';
+  v.textContent=verdict+' Fit '+avg+' out of 100. Weakest link, '+worst.pairName+': '+blendLine(worst);
+}
 $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261030';
+const BUILD='0809261035';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
