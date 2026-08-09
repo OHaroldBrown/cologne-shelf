@@ -327,9 +327,9 @@ input[type=file]{display:none}
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
       <button class="btn wide" id="mPrint">Print the shelf list</button>
-      <button class="btn wide" id="mSeed">Load my 7 bottles</button>
+      <button class="btn wide" id="mSeed">Load my bottles</button>
     </div>
-    <input type="file" id="mFile" accept="application/json">
+    <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
     <p class="lbl" style="margin-top:24px">Add to home screen</p>
     <p>iPhone, open in Safari, tap Share, then Add to Home Screen. Android, open in Chrome, tap the menu, then Add to Home screen. It then opens like an app.</p>
   </div>
@@ -400,6 +400,7 @@ const ORIGINALS=[
 ['Cedrat Boise','Mancera',165],['Intense Cafe','Montale',160],
 ['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130],
 ['Bianco Latte','Giardini di Toscana',155],
+['Gold','Commodity',155],['Book','Commodity',155],['Paper','Commodity',155],['Juice','Commodity',155],
 ['Imagination','Louis Vuitton',320],['Paradigme','Prada',140],
 ['Bleu de Chanel L Exclusif','Chanel',275],['Euphoria Men','Calvin Klein',100]
 ];
@@ -423,7 +424,7 @@ const CLONES=[
 ['Royal Amber','Orientica'],['Velvet Gold','Orientica'],['Amber Rouge','Orientica'],['Fabulous Oud','Orientica'],
 ['King','Bharara'],['Hayaati','Khadlaj'],['Oud Al Layl','Zimaya'],
 ['Sultan Malik','Zimaya'],['Ophylia','Nusuk'],
-['Ineffable','Oakcha'],['Melting Embers','Oakcha'],
+['Ineffable','Oakcha'],['Why','Oakcha'],['Melting Embers','Oakcha'],
 ['Caribbean Waters','The Dua Brand'],['Imagine','The Dua Brand'],
 ['Nocturno Elixir','Rayhaan'],['Woody Sandalwood','Dossier'],
 ['Royalty','Sentiment'],['Intoxicate Mystique','La Fede'],['Blue Nectar','Fragrance World'],
@@ -440,7 +441,7 @@ const HOUSES=[
 'Kilian','L Artisan Parfumeur','Lacoste','Lancome','Lattafa','Le Labo','Maison Alhambra',
 'Maison Francis Kurkdjian','Maison Margiela','Mancera','Memo Paris','Michael Kors','Montagne Parfums',
 'Montale','Montblanc','Moschino','Mugler','My Perfumes','Nasomatto','Nautica','Nishane','Nusuk','Oakcha',
-'La Fede','Rayhaan','Sentiment','The Dua Brand',
+'Commodity','La Fede','Rayhaan','Sentiment','The Dua Brand',
 'Orientica','Ormonde Jayne','Orto Parisi','Paco Rabanne','Paris Corner','Parfums de Marly','Penhaligons',
 'Porsche Design','Prada','Ralph Lauren','Rasasi','Riiffs','Roja Parfums','Salvatore Ferragamo',
 'Serge Lutens','Swiss Arabian','Tiziana Terenzi','Tom Ford','Tommy Hilfiger','Valentino','Van Cleef and Arpels',
@@ -844,6 +845,8 @@ $('mPrint').onclick=()=>{hide('menu');setTimeout(()=>window.print(),150);};
 /* ---------------- backup ---------------- */
 const BK='shelf-lastbackup';
 function bkName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.json';}
+/* Chrome Android blocks .json through the share sheet, so share it as text */
+function bkShareName(){return 'cologne-shelf-'+new Date().toISOString().slice(0,10)+'.txt';}
 function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'application/json'});}
 function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}bkBar();bkLabel();}
 function bkAge(){try{const t=Number(localStorage.getItem(BK)||0);return t?Math.floor((Date.now()-t)/86400000):null;}catch(e){return null;}}
@@ -866,15 +869,17 @@ function bkDownload(){
   bkStamp();
 }
 async function bkShare(){
-  const file=new File([bkBlob()],bkName(),{type:'application/json'});
+  const txt=new Blob([JSON.stringify({app:'shelf',version:1,items},null,2)],{type:'text/plain'});
+  const file=new File([txt],bkShareName(),{type:'text/plain'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{
       await navigator.share({files:[file],title:'Cologne shelf backup'});
-      bkStamp();toast('Sent');
-    }catch(e){ if(e&&e.name!=='AbortError')toast('Share did not open'); }
-  }else{
-    bkDownload();toast('Saved to this device. Upload it to Drive.');
+      bkStamp();toast('Sent');return;
+    }catch(e){
+      if(e&&e.name==='AbortError')return;
+    }
   }
+  bkDownload();toast('Share blocked. Saved to this device instead.');
 }
 $('mDrive').onclick=()=>{bkShare();};
 $('mExport').onclick=()=>{bkDownload();};
@@ -897,6 +902,7 @@ $('mFile').onchange=e=>{
     try{
       const d=JSON.parse(fr.result);
       if(!d.items)throw 0;
+      if(items.length&&!confirm('This replaces all '+items.length+' bottles on the shelf with the '+d.items.length+' in the file. Continue?')){toast('Left alone');return;}
       items=d.items;await save();render();hide('menu');toast('Restored');
     }catch(err){toast('That file did not read');}
   };
@@ -1081,6 +1087,131 @@ const SEED=[
   ],
   "fill": 100,
   "notes": "Violet leaf, cardamom, orris, ambrox, cedar, sandalwood, musk",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-comgold",
+  "name": "Gold",
+  "house": "Commodity",
+  "kind": "original",
+  "cloneOf": "",
+  "paid": null,
+  "retail": null,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Fall",
+   "Winter"
+  ],
+  "vibes": [
+   "Casual",
+   "Night",
+   "Dressy"
+  ],
+  "fill": 100,
+  "notes": "Musk, juniper, vanilla, amber, sandalwood, benzoin",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-combook",
+  "name": "Book",
+  "house": "Commodity",
+  "kind": "original",
+  "cloneOf": "",
+  "paid": null,
+  "retail": null,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Fall"
+  ],
+  "vibes": [
+   "Office",
+   "Casual"
+  ],
+  "fill": 100,
+  "notes": "Virginia cedar, eucalyptus, rosewood, bergamot, cypress, amyris, amber, sandalwood, musk",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-compaper",
+  "name": "Paper",
+  "house": "Commodity",
+  "kind": "original",
+  "cloneOf": "",
+  "paid": null,
+  "retail": null,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer",
+   "Fall",
+   "Winter"
+  ],
+  "vibes": [
+   "Office",
+   "Casual"
+  ],
+  "fill": 100,
+  "notes": "Iso E Super, cedar, sandalwood",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-comjuice",
+  "name": "Juice",
+  "house": "Commodity",
+  "kind": "original",
+  "cloneOf": "",
+  "paid": null,
+  "retail": null,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer"
+  ],
+  "vibes": [
+   "Casual"
+  ],
+  "fill": 100,
+  "notes": "",
+  "photo": null,
+  "wears": 0,
+  "lastWorn": null
+ },
+ {
+  "id": "sd-why",
+  "name": "Why",
+  "house": "Oakcha",
+  "kind": "dupe",
+  "cloneOf": "Yves Saint Laurent Y",
+  "paid": null,
+  "retail": 130,
+  "size": null,
+  "rating": null,
+  "seasons": [
+   "Spring",
+   "Summer",
+   "Fall"
+  ],
+  "vibes": [
+   "Office",
+   "Casual",
+   "Night",
+   "Date"
+  ],
+  "fill": 100,
+  "notes": "Ginger, grapefruit, aldehydes, apple, lavender, sage, geranium, tonka, cedar, olibanum, patchouli",
   "photo": null,
   "wears": 0,
   "lastWorn": null
