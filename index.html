@@ -62,7 +62,7 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
 #build{
-  text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;
+  text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;line-height:1.9;
   color:var(--ink);opacity:.55}
 @media print{#build{opacity:1}}
 /* ---------- header ---------- */
@@ -79,6 +79,11 @@ header{
   background:none;border:1px solid var(--line);border-radius:999px;
   width:34px;height:34px;display:grid;place-items:center;cursor:pointer;font-size:15px
 }
+#themeBtn{
+  width:46px;height:46px;border:none;background:none;
+  color:var(--ink);font-size:30px;line-height:1;padding:0
+}
+#themeBtn:hover{opacity:.7}
 .tools{display:flex;gap:6px;align-items:center}
 #search{
   width:100%;margin-top:10px;padding:9px 12px;border:1px solid var(--line);
@@ -256,7 +261,7 @@ input[type=file]{display:none}
     <h1 class="brand disp">The <em>Shelf</em></h1>
     <div class="tools">
       <span class="count mono" id="countLbl">0</span>
-      <button class="iconbtn" id="themeBtn" title="Light or dark">◐</button>
+      <button class="iconbtn" id="themeBtn" title="Light or dark" aria-label="Light or dark">☀</button>
       <button class="iconbtn" id="menuBtn" title="Backup and restore">⋯</button>
     </div>
   </div>
@@ -274,7 +279,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="grid" id="grid"></div>
-<div id="build">BUILD 0809261035</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261041</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -368,7 +373,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261035</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261041</p>
     <div class="actions">
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -626,6 +631,8 @@ function setTheme(mode){
   document.documentElement.setAttribute('data-theme',mode);
   document.querySelector('meta[name=theme-color]').setAttribute('content',mode==='dark'?'#0C1416':'#E7ECEA');
   try{localStorage.setItem('shelf-theme',mode);}catch(e){}
+  const b=document.getElementById('themeBtn');
+  if(b)b.textContent = mode==='dark' ? '\u263E' : '\u2600';
 }
 setTheme('light');
 $('themeBtn').onclick=()=>{
@@ -1263,7 +1270,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261035';
+const BUILD='0809261041';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
