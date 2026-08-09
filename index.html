@@ -73,6 +73,11 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
   color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
 .rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 .rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
+.help{padding-left:20px;margin:0 0 8px}
+.help li{margin-bottom:12px;line-height:1.55}
+#hBody h3{margin:26px 0 8px}
+#hBody h3:first-child{margin-top:0}
+#hBody p{line-height:1.6;margin:0 0 8px}
 .hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
 #stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
@@ -87,6 +92,11 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
   color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
 .rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 .rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
+.help{padding-left:20px;margin:0 0 8px}
+.help li{margin-bottom:12px;line-height:1.55}
+#hBody h3{margin:26px 0 8px}
+#hBody h3:first-child{margin-top:0}
+#hBody p{line-height:1.6;margin:0 0 8px}
 .hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
 #stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
@@ -301,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261144</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261359</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -316,6 +326,38 @@ input[type=file]{display:none}
     <button class="btn" id="dEdit">Edit</button>
   </div>
   <div class="sheetbody" id="dBody"></div>
+</section>
+
+<section class="sheet" id="help" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="hClose">Back</button>
+    <strong>Getting started</strong>
+  </div>
+  <div class="sheetbody" id="hBody">
+    <h3 class="disp">Filling the shelf fast</h3>
+    <p>Entering fifty bottles by hand is miserable. Let an AI do the typing.</p>
+    <ol class="help">
+      <li><strong>Photograph your bottles</strong> in groups of four to six, labels facing the camera, in decent light. One shot of a whole shelf from across the room gets you guesses.</li>
+      <li><strong>Tap Copy the AI prompt</strong> in the Backup menu. Paste it into any AI chat, attach your photos, and add anything the label does not say, like what you paid.</li>
+      <li><strong>Check the CSV it gives you.</strong> Spot check a few rows. Clone houses look alike and get misidentified, so the printed label wins over the AI every time.</li>
+      <li><strong>Import a spreadsheet</strong> from the Backup menu. Bottles are matched on name and house, so importing a corrected file updates rather than duplicates.</li>
+      <li><strong>Add photos yourself.</strong> Tap a bottle, Edit, tap the photo box. No AI can put pictures into this app, and the shot you already took is better anyway, it shows the real bottle at its real level.</li>
+    </ol>
+    <h3 class="disp">What the AI gets wrong</h3>
+    <p>Retail prices drift and every model has a knowledge cutoff, so treat them as rough. Obscure clones often have no published notes, in which case use the original's accords, since that is what the clone is chasing. The prompt tells the AI to leave a cell blank rather than guess, and blank beats wrong here.</p>
+
+    <h3 class="disp">Notes versus comments</h3>
+    <p>Notes and accords should be scent words only, like pineapple, bergamot, birch, smoky woods. That field drives the layering suggestions. Put your own opinions in My comments instead.</p>
+
+    <h3 class="disp">Layering</h3>
+    <p>Open a bottle and scroll down for its best partners, or open Layering from the menu for the whole shelf plus your saved blends. Scores come from shared accords, whether one lifts and one anchors, and season overlap. It is a starting point, not a verdict. Rate what you actually wear.</p>
+
+    <h3 class="disp">Backups matter here</h3>
+    <p>Your shelf lives in this browser, not on a server. It does not follow you to another phone or browser on its own. Send a backup to Drive regularly, and always before switching devices or clearing your browser. Restore replaces everything, so use it deliberately. Undo the last change rolls back the last three.</p>
+
+    <h3 class="disp">Install it</h3>
+    <p>Android, open in Chrome, menu, Install. iPhone, open in Safari, Share, Add to Home Screen. It then opens like a normal app and works offline.</p>
+  </div>
 </section>
 
 <section class="sheet" id="layers" aria-hidden="true">
@@ -405,8 +447,9 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261144</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261359</p>
     <div class="actions">
+      <button class="btn wide" id="mHelp">Getting started</button>
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
@@ -1349,11 +1392,13 @@ function buildVerdict(){
   let verdict = avg>=70?'Strong combination.' : avg>=45?'Should work.' : 'Risky.';
   v.textContent=verdict+' Fit '+avg+' out of 100. Weakest link, '+worst.pairName+': '+blendLine(worst);
 }
+$('hClose').onclick=()=>hide('help');
+$('mHelp').onclick=()=>{hide('menu');show('help');};
 $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261144';
+const BUILD='0809261359';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
