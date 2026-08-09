@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261359</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809261735</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -394,6 +394,20 @@ input[type=file]{display:none}
         <option value="dupe">A copy of something</option>
       </select>
     </div>
+    <div class="field">
+      <label>Format</label>
+      <select id="eFormat">
+        <option value="EDP">Eau de parfum</option>
+        <option value="Extrait">Extrait</option>
+        <option value="EDT">Eau de toilette</option>
+        <option value="Cologne">Eau de cologne</option>
+        <option value="Oil">Oil</option>
+        <option value="Solid">Solid</option>
+        <option value="Body spray">Body spray</option>
+        <option value="Lotion">Lotion</option>
+        <option value="Hair mist">Hair mist</option>
+      </select>
+    </div>
     <div class="field" id="eCloneWrap" style="display:none">
       <label>Copy of</label><input type="text" id="eClone" list="originalList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="originalList"></datalist>
       <p class="lbl" style="margin:6px 0 0;font-weight:400;letter-spacing:.04em;text-transform:none">Picking a known one fills in its retail price. Edit it if yours differs.</p>
@@ -447,7 +461,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261359</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809261735</p>
     <div class="actions">
       <button class="btn wide" id="mHelp">Getting started</button>
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
@@ -681,8 +695,16 @@ const SEASONCODE={SP:'Spring',SU:'Summer',FA:'Fall',WI:'Winter'};
 const SEASONS=['Spring','Summer','Fall','Winter'];
 const ABBR={Spring:'SP',Summer:'SU',Fall:'FA',Winter:'WI'};
 const VIBES=['Office','Night','Date','Casual','Dressy','Travel'];
+const FORMATS=['Extrait','EDP','EDT','Cologne','Oil','Solid','Body spray','Lotion','Hair mist'];
+/* what goes on the skin first, and what is too thin to lead */
+const SKINFIRST=['Lotion','Oil','Solid'];
+const LIGHTWEIGHT=['Body spray','Cologne','Hair mist'];
+/* nothing but a full bottle belongs in the money math */
+const COUNTED=['Extrait','EDP','EDT','Cologne'];
+function fmtOf(it){return it.format||'EDP';}
+function isSpray(it){return !SKINFIRST.includes(fmtOf(it));}
 let items=[];
-let filter={q:'',season:'',vibe:'',kind:'',house:''};
+let filter={q:'',season:'',vibe:'',kind:'',house:'',format:''};
 let arranging=false;
 let blends=[];
 let editingId=null;
@@ -761,6 +783,16 @@ function buildChips(){
     b.onclick=()=>{filter[type]=filter[type]===val?'':val;buildChips();render();};
     c.appendChild(b);
   };
+  const fmts=document.createElement('button');
+  fmts.className='chip';fmts.id='fmtTog';
+  fmts.textContent=filter.format?filter.format:'Format';
+  fmts.setAttribute('aria-pressed',!!filter.format);
+  fmts.onclick=()=>{
+    const row=$('houses');
+    row.classList.toggle('on');
+    if(row.classList.contains('on'))buildFormatChips();
+  };
+  c.appendChild(fmts);
   const brands=document.createElement('button');
   brands.className='chip';brands.id='brandTog';
   brands.textContent=filter.house?filter.house:'Brands';
@@ -791,6 +823,24 @@ function buildChips(){
   mk('Originals','kind','original');
   VIBES.forEach(v=>mk(v,'vibe',v));
 }
+function buildFormatChips(){
+  const row=$('houses');row.innerHTML='';
+  const tally={};
+  items.forEach(i=>{const f=fmtOf(i);tally[f]=(tally[f]||0)+1;});
+  const names=FORMATS.filter(f=>tally[f]);
+  if(!names.length){row.innerHTML='<span class="lbl">Nothing yet</span>';return;}
+  names.forEach(f=>{
+    const b=document.createElement('button');
+    b.className='chip house';b.textContent=f+' '+tally[f];
+    b.setAttribute('aria-pressed',filter.format===f);
+    b.onclick=()=>{
+      filter.format=filter.format===f?'':f;
+      filter.house='';
+      buildChips();buildFormatChips();$('houses').classList.add('on');render();
+    };
+    row.appendChild(b);
+  });
+}
 function buildHouseChips(){
   const row=$('houses');row.innerHTML='';
   const tally={};
@@ -803,6 +853,7 @@ function buildHouseChips(){
     b.setAttribute('aria-pressed',filter.house===h);
     b.onclick=()=>{
       filter.house=filter.house===h?'':h;
+      filter.format='';
       buildChips();buildHouseChips();
       $('houses').classList.add('on');
       render();
@@ -819,6 +870,7 @@ function visible(){
     if(filter.vibe&&!(it.vibes||[]).includes(filter.vibe))return false;
     if(filter.kind&&it.kind!==filter.kind)return false;
     if(filter.house&&it.house!==filter.house)return false;
+    if(filter.format&&fmtOf(it)!==filter.format)return false;
     if(q){
       const hay=[it.name,it.house,it.cloneOf,it.notes].join(' ').toLowerCase();
       if(!hay.includes(q))return false;
@@ -852,16 +904,24 @@ function render(){
     g.appendChild(card);
   });
   /* only count a bottle once we know what it cost */
-  const priced=items.filter(b=>b.paid!=null&&b.paid!=='' );
+  /* lotions and body sprays are not what the savings figure is about */
+  const inMath=items.filter(b=>COUNTED.includes(fmtOf(b)));
+  const priced=inMath.filter(b=>b.paid!=null&&b.paid!=='');
   const paid=priced.reduce((a,b)=>a+(Number(b.paid)||0),0);
   const retail=priced.reduce((a,b)=>a+(Number(b.retail)||Number(b.paid)||0),0);
-  const missing=items.length-priced.length;
+  const missing=inMath.length-priced.length;
+  const sideCount=items.length-inMath.length;
   $('stBottles').textContent=items.length;
   $('stPaid').textContent=money(paid);
-  $('stRetail').textContent=money(items.reduce((a,b)=>a+(Number(b.retail)||0),0));
+  $('stRetail').textContent=money(inMath.reduce((a,b)=>a+(Number(b.retail)||0),0));
   $('stSaved').textContent=money(Math.max(0,retail-paid));
   const note=$('stNote');
-  if(note)note.textContent=missing?missing+' without a price yet':'';
+  if(note){
+    const bits=[];
+    if(missing)bits.push(missing+' without a price yet');
+    if(sideCount)bits.push(sideCount+' lotion or body spray, not counted above');
+    note.textContent=bits.join(' \u00b7 ');
+  }
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
@@ -884,6 +944,7 @@ function openDetail(id){
       ${row('Retail',it.retail?money(it.retail):'')}
       ${row('Size',it.size?it.size+' ml':'')}
       ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
+      ${row('Format',fmtOf(it),true)}
       <div class="row" id="dRateRow" style="cursor:pointer">
         <span class="k">Overall</span>
         <span class="v txt">${it.rating?it.rating+' / 10':'tap to rate'}</span>
@@ -961,6 +1022,7 @@ function openEditor(id){
   $('eName').value=it?it.name||'':'';
   $('eHouse').value=it?it.house||'':'';
   $('eKind').value=it?it.kind||'original':'original';
+  $('eFormat').value=it&&it.format?it.format:'EDP';
   $('eClone').value=it?it.cloneOf||'':'';
   $('ePaid').value=it&&it.paid!=null?it.paid:'';
   $('eRetail').value=it&&it.retail!=null?it.retail:'';
@@ -1056,6 +1118,7 @@ $('eSave').onclick=async()=>{
     name,
     house:$('eHouse').value.trim(),
     kind:$('eKind').value,
+    format:$('eFormat').value,
     cloneOf:$('eKind').value==='dupe'?$('eClone').value.trim():'',
     paid:$('ePaid').value===''?null:Number($('ePaid').value),
     retail:$('eRetail').value===''?null:Number($('eRetail').value),
@@ -1188,7 +1251,20 @@ function pairScore(a,b){
   /* two busy fragrances muddy each other */
   if(fa.length>=5&&fb.length>=5){score-=12;con.push('both are busy scents, they can muddy each other');}
 
-  const base=(da>=db)?a:b, top=(base===a)?b:a;
+  /* format beats guesswork on what goes first */
+  const aSkin=SKINFIRST.includes(fmtOf(a)), bSkin=SKINFIRST.includes(fmtOf(b));
+  let base=(da>=db)?a:b;
+  if(aSkin!==bSkin){
+    base=aSkin?a:b;
+    score+=18;
+    pro.unshift('the '+fmtOf(base).toLowerCase()+' underneath makes the spray last longer');
+  }else if(aSkin&&bSkin){
+    score-=15;con.push('two skin layers with nothing to project');
+  }
+  /* a thin body spray supports, it does not lead */
+  const aLight=LIGHTWEIGHT.includes(fmtOf(a)), bLight=LIGHTWEIGHT.includes(fmtOf(b));
+  if(aLight&&bLight){score-=12;con.push('both are light, this will not last');}
+  const top=(base===a)?b:a;
   return {score:Math.max(0,Math.min(88,score)), pro:pro, con:con, base:base, top:top,
           seasons:seasons, shared:shared};
 }
@@ -1398,7 +1474,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261359';
+const BUILD='0809261735';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1415,7 +1491,7 @@ async function checkBuild(){
 
 
 /* ---------------- spreadsheet in and out ---------------- */
-const COLS=['name','house','kind','cloneOf','paid','retail','size','rating','longevity',
+const COLS=['name','house','kind','format','cloneOf','paid','retail','size','rating','longevity',
             'projection','compliments','seasons','vibes','notes','comment','fill'];
 
 function csvParse(text){
@@ -1494,6 +1570,8 @@ function csvIn(text){
       if(v)b[f]=v.split(/[;|,]/).map(x=>x.trim()).filter(Boolean)
         .map(x=>x.charAt(0).toUpperCase()+x.slice(1).toLowerCase());
     });
+    const fm=get('format');
+    if(fm){const hit=FORMATS.find(x=>x.toLowerCase()===fm.toLowerCase());if(hit)b.format=hit;}
     if(get('notes'))b.notes=get('notes');
     if(get('comment'))b.comment=get('comment');
   });
@@ -1511,12 +1589,13 @@ $('mCsvFile').onchange=e=>{
 const AIPROMPT=`I am filling in a fragrance collection tracker. Below is my list of bottles.
 Return ONLY a CSV, no commentary, no code fences, with exactly this header row:
 
-name,house,kind,cloneOf,paid,retail,size,rating,longevity,projection,compliments,seasons,vibes,notes,comment,fill
+name,house,kind,format,cloneOf,paid,retail,size,rating,longevity,projection,compliments,seasons,vibes,notes,comment,fill
 
 Rules for each column:
 name        the fragrance name without the house
 house       the brand that makes it
 kind        original, or dupe if it is a clone of another fragrance
+format      one of Extrait, EDP, EDT, Cologne, Oil, Solid, Body spray, Lotion, Hair mist
 cloneOf     if kind is dupe, the full name of the fragrance it copies, house included. Leave blank for originals.
 paid        leave blank, I fill this in
 retail      current US list price of the ORIGINAL in dollars, digits only
