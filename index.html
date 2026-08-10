@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809262156</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809262203</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -474,7 +474,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809262156</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809262203</p>
     <div class="actions">
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
@@ -1490,7 +1490,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809262156';
+const BUILD='0809262203';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1641,19 +1641,133 @@ $('mPrompt').onclick=async()=>{
 
 /* ---------------- research ---------------- */
 const HOUSEREF={"Lattafa": [["Asad", "Dior Sauvage Elixir"], ["Khamrah", "Kilian Angels' Share"], ["Ana Abiyedh Rouge", "MFK Baccarat Rouge 540"], ["Aura", "MFK Baccarat Rouge 540"], ["Yara", "Van Cleef Orchidee Vanille"], ["Fakhar Black", "YSL Y EDP"], ["Bade'e Al Oud Oud for Glory", "Initio Oud for Greatness"], ["Ansaam Silver", "Azzaro The Most Wanted"], ["Asad Bourbon", "Azzaro The Most Wanted"], ["Art of Arabia I", "Louis Vuitton Imagination"], ["Blue Sapphire", "Versace Eros"], ["Eclaire", "Giardini di Toscana Bianco Latte"], ["Choco Overdose", "Montale Chocolate Greedy"], ["Confidential Platinum", "Chanel Allure Homme Sport"], ["Breeze", "MFK 724"], ["Art of Wood", "Parfums de Marly Perseus"], ["Atlas", "Orto Parisi Megamare"]], "Armaf": [["Club de Nuit Intense Man", "Creed Aventus"], ["Club de Nuit Sillage", "Creed Silver Mountain Water"], ["Club de Nuit Milestone", "Creed Millesime Imperial"], ["Club de Nuit Precieux", "Creed Aventus Absolu"], ["Club de Nuit Untold", "MFK Baccarat Rouge 540"], ["Club de Nuit Urban Man Elixir", "Dior Sauvage"], ["Club de Nuit Woman", "Chanel Coco Mademoiselle"], ["Tres Nuit", "Creed Green Irish Tweed"], ["Individuel", "Creed Original Santal"], ["Odyssey", "Paco Rabanne Invictus"], ["Craze", "Parfums de Marly Pegasus"], ["Craze Bleu", "Ralph Lauren Polo Blue"], ["Connoisseur Man", "YSL Y Le Parfum"]], "Dossier": [["Woody Sandalwood", "Le Labo Santal 33"], ["Ambery Saffron", "MFK Baccarat Rouge 540"], ["Ambery Vanilla", "YSL Black Opium"], ["Gourmand White Flowers", "Viktor & Rolf Flowerbomb"], ["Citrus Matcha", "Le Labo Matcha 26"], ["Ambery Tuberose", "Diptyque Do Son"]]};
-let rTab='Originals';
+let rTab='Browse';
+let rHouse='';
+let rPick=null;
 const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]]];
 function onShelf(nm,hs){
   return items.some(b=>(b.name||'').trim().toLowerCase()===nm.toLowerCase()
                     &&(b.house||'').trim().toLowerCase()===hs.toLowerCase());
 }
+
+/* ---- browse the whole catalog, drill into anything ---- */
+function catalogAll(){
+  const out=[];
+  ORIGINALS.forEach(o=>out.push({name:o[0],house:o[1],kind:'original'}));
+  CLONES.forEach(o=>out.push({name:o[0],house:o[1],kind:'dupe'}));
+  return out;
+}
+/* everything known to relate to this fragrance, both directions */
+function comparablesFor(nm,hs,kind){
+  const full=(nm+' '+hs).toLowerCase(), name=nm.toLowerCase();
+  const out=[];
+  const push=(n,h,why)=>{ if(!out.some(x=>x.name===n&&x.house===h))out.push({name:n,house:h,why:why}); };
+  if(kind==='original'){
+    REF.forEach(([on,oh,cl])=>{ if(on.toLowerCase()===name)cl.forEach(([cn,ch])=>push(cn,ch,'clone of it')); });
+    Object.keys(HOUSEREF).forEach(h=>HOUSEREF[h].forEach(([cn,og])=>{
+      if(og.toLowerCase().includes(name))push(cn,h,'clone of it');
+    }));
+  }else{
+    /* a properly structured original wins over a free text one */
+    REF.forEach(([on,oh,cl])=>{
+      if(cl.some(([cn,ch])=>cn.toLowerCase()===name)){
+        push(on,oh,'it copies this');
+        cl.forEach(([cn,ch])=>{ if(cn.toLowerCase()!==name)push(cn,ch,'another clone of the same thing'); });
+      }
+    });
+    const named=()=>out.some(x=>x.why==='it copies this');
+    const loose=t=>{
+      if(!t)return;
+      const clean=String(t).replace(/^(MFK|YSL|PdM) /,'');
+      if(out.some(x=>clean.toLowerCase().includes(x.name.toLowerCase())))return;
+      push(clean,'','it copies this');
+    };
+    if(!named()){
+      Object.keys(HOUSEREF).forEach(h=>HOUSEREF[h].forEach(([cn,og])=>{
+        if(cn.toLowerCase()===name&&h===hs)loose(og);
+      }));
+    }
+    const pr=PROF[full];
+    if(pr&&pr[3]&&!named())loose(pr[3]);
+  }
+  return out;
+}
+function renderPick(){
+  const it=rPick;
+  const pr=PROF[(it.name+' '+it.house).toLowerCase()];
+  const comps=comparablesFor(it.name,it.house,it.kind);
+  const retail=RETAIL[(it.name+' '+it.house).toLowerCase()];
+  $('rBody').innerHTML=`
+    <button class="btn" id="rBack" style="margin-bottom:12px">Back to the list</button>
+    <div class="lay">
+      <h4>${esc(it.name)}</h4>
+      <p class="ord">${esc(it.house)} &middot; ${it.kind==='dupe'?'a clone':'an original'}${retail?' &middot; about $'+retail:''}${onShelf(it.name,it.house)?' &middot; on your shelf':''}</p>
+      ${pr?`<p class="why">${esc(pr[0])}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
+      ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='it copies this')?comps.find(c=>c.why==='it copies this').name:'')}">Add to my shelf</button></div>`}
+    </div>
+    <h3 class="disp" style="margin:20px 0 10px">Comparable to</h3>
+    ${comps.length?comps.map(c=>`<div class="lay">
+      <div class="mini" style="align-items:center">
+        <span style="flex:2;font-size:13px">${esc(c.name)}${c.house?'<br><span style="opacity:.65">'+esc(c.house)+'</span>':''}
+          <br><span style="opacity:.55;font-size:12px">${esc(c.why)}</span></span>
+        ${c.house&&!onShelf(c.name,c.house)?`<button style="flex:1" data-add="${esc(c.name)}|${esc(c.house)}|${c.why==='it copies this'?'original':'dupe'}|">Add</button>`
+          :'<span style="flex:1;font-size:12px;opacity:.6;text-align:right">'+(c.house?'on your shelf':'')+'</span>'}
+      </div></div>`).join('')
+      :'<p style="opacity:.7">Nothing confirmed for this one yet.</p>'}`;
+  $('rBack').onclick=()=>{rPick=null;renderResearch();};
+  wireAdds();
+}
+function renderBrowse(){
+  const q=($('rSearch').value||'').trim().toLowerCase();
+  if(rPick)return renderPick();
+  const all=catalogAll();
+  if(q){
+    const hit=all.filter(x=>(x.name+' '+x.house).toLowerCase().includes(q)).slice(0,80);
+    $('rBody').innerHTML=hit.length?rowsFor(hit):'<p style="opacity:.7">Nothing matches that.</p>';
+    return wirePicks();
+  }
+  if(rHouse){
+    const hit=all.filter(x=>x.house===rHouse);
+    $('rBody').innerHTML=`<button class="btn" id="rBack" style="margin-bottom:12px">All brands</button>
+      <h3 class="disp" style="margin:0 0 10px">${esc(rHouse)}</h3>`+rowsFor(hit);
+    $('rBack').onclick=()=>{rHouse='';renderResearch();};
+    return wirePicks();
+  }
+  const tally={};
+  all.forEach(x=>{tally[x.house]=(tally[x.house]||0)+1;});
+  const names=Object.keys(tally).sort((a,b)=>a.localeCompare(b));
+  $('rBody').innerHTML='<div class="lay">'+names.map(h=>
+    `<div class="mini" style="align-items:center;margin-bottom:8px">
+      <span style="flex:2;font-size:14px">${esc(h)}</span>
+      <button style="flex:1" data-house="${esc(h)}">${tally[h]} &rsaquo;</button>
+    </div>`).join('')+'</div>';
+  $('rBody').querySelectorAll('[data-house]').forEach(b=>{
+    b.onclick=()=>{rHouse=b.dataset.house;renderResearch();};
+  });
+}
+function rowsFor(list){
+  return '<div class="lay">'+list.map(x=>
+    `<div class="mini" style="align-items:center;margin-bottom:8px">
+      <span style="flex:2;font-size:13px">${esc(x.name)}<br><span style="opacity:.65">${esc(x.house)}${x.kind==='dupe'?' &middot; clone':''}</span></span>
+      <button style="flex:1" data-pick="${esc(x.name)}|${esc(x.house)}|${x.kind}">Look &rsaquo;</button>
+    </div>`).join('')+'</div>';
+}
+function wirePicks(){
+  $('rBody').querySelectorAll('[data-pick]').forEach(b=>{
+    b.onclick=()=>{
+      const [n,h,k]=b.dataset.pick.split('|');
+      rPick={name:n,house:h,kind:k};renderResearch();
+    };
+  });
+}
+
 function renderTabs(){
   const c=$('rTabs');c.innerHTML='';
-  ['Originals'].concat(Object.keys(HOUSEREF)).forEach(t=>{
+  ['Browse','Originals'].concat(Object.keys(HOUSEREF)).forEach(t=>{
     const b=document.createElement('button');
     b.className='chip';b.textContent=t;
     b.setAttribute('aria-pressed',rTab===t);
-    b.onclick=()=>{rTab=t;renderResearch();};
+    b.onclick=()=>{rTab=t;rHouse='';rPick=null;renderResearch();};
     c.appendChild(b);
   });
 }
@@ -1673,6 +1787,7 @@ function wireAdds(){
 }
 function renderResearch(){
   renderTabs();
+  if(rTab==='Browse')return renderBrowse();
   if(rTab!=='Originals')return renderHouse();
   const q=($('rSearch').value||'').trim().toLowerCase();
   const hit=REF.filter(([nm,hs,cl])=>{
@@ -1696,7 +1811,7 @@ function renderResearch(){
 }
 $('mResearch').onclick=()=>{hide('menu');renderResearch();show('research');};
 $('rClose').onclick=()=>hide('research');
-$('rSearch').oninput=renderResearch;
+$('rSearch').oninput=()=>{rPick=null;renderResearch();};
 
 /* ---------------- cleanup tools ---------------- */
 function dupKey(b){return ((b.name||'').trim().toLowerCase()+'|'+(b.house||'').trim().toLowerCase());}
