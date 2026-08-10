@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809262211</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0810261821</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -474,7 +474,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809262211</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0810261821</p>
     <div class="actions">
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
@@ -724,6 +724,7 @@ let items=[];
 let filter={q:'',season:'',vibe:'',kind:'',house:'',format:''};
 let arranging=false;
 let blends=[];
+let wish=[];
 let editingId=null;
 let pendingPhoto=null;
 
@@ -1491,7 +1492,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809262211';
+const BUILD='0810261821';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1693,39 +1694,37 @@ function comparablesFor(nm,hs,kind){
         if(cn.toLowerCase()===name&&h===hs)loose(og);
       }));
     }
-    const pr=PROF[full];
+    const pr=PROF[(hs+' '+nm).toLowerCase()];
     if(pr&&pr[3]&&!named())loose(pr[3]);
   }
   return out;
 }
 function renderPick(){
   const it=rPick;
-  const pr=PROF[(it.name+' '+it.house).toLowerCase()];
+  const pr=PROF[(it.house+' '+it.name).toLowerCase()];
   const comps=comparablesFor(it.name,it.house,it.kind);
-  const retail=RETAIL[(it.name+' '+it.house).toLowerCase()];
+  const retail=RETAIL[(it.house+' '+it.name).toLowerCase()];
   $('rBody').innerHTML=`
-    <button class="btn" id="rBack" style="margin-bottom:12px">Back to the list</button>
+    <button class="btn" data-r="unpick" style="margin-bottom:12px">Back to the list</button>
     <div class="lay">
       <h4>${esc(it.name)}</h4>
       <p class="ord">${esc(it.house)} &middot; ${it.kind==='dupe'?'a clone':'an original'}${retail?' &middot; about $'+retail:''}${onShelf(it.name,it.house)?' &middot; on your shelf':''}</p>
       ${pr?`<p class="why">${esc(pr[0])}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
-      ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='it copies this')?comps.find(c=>c.why==='it copies this').name:'')}">Add to my shelf</button></div>`}
+      ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='it copies this')?comps.find(c=>c.why==='it copies this').name:'')}">Add to my shelf</button>
+        <button data-wish="${esc(it.name)}|${esc(it.house)}">${onWish(it.name,it.house)?'On the list':'Wish list'}</button></div>`}
     </div>
-    <div class="mini" style="margin-bottom:4px"><button id="rLook">Look it up on Fragrantica</button></div>
+    <div class="mini" style="margin-bottom:4px"><button data-look="1">Look it up on Fragrantica</button></div>
     <h3 class="disp" style="margin:20px 0 10px">Comparable to</h3>
     ${comps.length?comps.map(c=>`<div class="lay">
       <div class="mini" style="align-items:center">
         <span style="flex:2;font-size:13px">${esc(c.name)}${c.house?'<br><span style="opacity:.65">'+esc(c.house)+'</span>':''}
           <br><span style="opacity:.55;font-size:12px">${esc(c.why)}</span></span>
         ${c.debated?'<span class="tagcur" style="background:none;color:var(--ink);border:1px solid var(--line);opacity:.8">debated</span> ':''}
-        ${c.house&&!onShelf(c.name,c.house)?`<button style="flex:1" data-add="${esc(c.name)}|${esc(c.house)}|${c.why==='it copies this'?'original':'dupe'}|">Add</button>`
+        ${c.house&&!onShelf(c.name,c.house)?`<button style="flex:1" data-add="${esc(c.name)}|${esc(c.house)}|${c.why==='it copies this'?'original':'dupe'}|">Add</button>
+             <button style="flex:1" data-wish="${esc(c.name)}|${esc(c.house)}">${onWish(c.name,c.house)?'On the list':'Wish'}</button>`
           :'<span style="flex:1;font-size:12px;opacity:.6;text-align:right">'+(c.house?'on your shelf':'')+'</span>'}
       </div></div>`).join('')
       :'<p style="opacity:.7">Nothing confirmed for this one yet.</p>'}`;
-  $('rBack').onclick=()=>{rPick=null;renderResearch();};
-  $('rLook').onclick=()=>window.open('https://www.fragrantica.com/search/?query='
-    +encodeURIComponent(it.name+' '+it.house),'_blank','noopener');
-  wireAdds();
 }
 function renderBrowse(){
   const q=($('rSearch').value||'').trim().toLowerCase();
@@ -1734,14 +1733,13 @@ function renderBrowse(){
   if(q){
     const hit=all.filter(x=>(x.name+' '+x.house).toLowerCase().includes(q)).slice(0,80);
     $('rBody').innerHTML=hit.length?rowsFor(hit):'<p style="opacity:.7">Nothing matches that.</p>';
-    return wirePicks();
+    return;
   }
   if(rHouse){
     const hit=all.filter(x=>x.house===rHouse);
-    $('rBody').innerHTML=`<button class="btn" id="rBack" style="margin-bottom:12px">All brands</button>
+    $('rBody').innerHTML=`<button class="btn" data-r="allbrands" style="margin-bottom:12px">All brands</button>
       <h3 class="disp" style="margin:0 0 10px">${esc(rHouse)}</h3>`+rowsFor(hit);
-    $('rBack').onclick=()=>{rHouse='';renderResearch();};
-    return wirePicks();
+      return;
   }
   const tally={};
   all.forEach(x=>{tally[x.house]=(tally[x.house]||0)+1;});
@@ -1751,9 +1749,6 @@ function renderBrowse(){
       <span style="flex:2;font-size:14px">${esc(h)}</span>
       <button style="flex:1" data-house="${esc(h)}">${tally[h]} &rsaquo;</button>
     </div>`).join('')+'</div>';
-  $('rBody').querySelectorAll('[data-house]').forEach(b=>{
-    b.onclick=()=>{rHouse=b.dataset.house;renderResearch();};
-  });
 }
 function rowsFor(list){
   return '<div class="lay">'+list.map(x=>
@@ -1762,18 +1757,10 @@ function rowsFor(list){
       <button style="flex:1" data-pick="${esc(x.name)}|${esc(x.house)}|${x.kind}">Look &rsaquo;</button>
     </div>`).join('')+'</div>';
 }
-function wirePicks(){
-  $('rBody').querySelectorAll('[data-pick]').forEach(b=>{
-    b.onclick=()=>{
-      const [n,h,k]=b.dataset.pick.split('|');
-      rPick={name:n,house:h,kind:k};renderResearch();
-    };
-  });
-}
 
 function renderTabs(){
   const c=$('rTabs');c.innerHTML='';
-  ['Browse','Originals'].concat(Object.keys(HOUSEREF)).forEach(t=>{
+  ['Browse','Wish list','Originals'].concat(Object.keys(HOUSEREF)).forEach(t=>{
     const b=document.createElement('button');
     b.className='chip';b.textContent=t;
     b.setAttribute('aria-pressed',rTab===t);
@@ -1788,15 +1775,85 @@ function renderHouse(){
     '<div class="lay">'+list.map(([cn,og])=>`<div class="mini" style="align-items:center;margin-bottom:10px">
       <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">copies ${esc(og)}</span></span>
       ${onShelf(cn,rTab)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
-        :`<button style="flex:1" data-add="${esc(cn)}|${rTab}|dupe|${esc(og)}">Add</button>`}
+        :`<button style="flex:1" data-add="${esc(cn)}|${rTab}|dupe|${esc(og)}">Add</button>
+           <button style="flex:1" data-wish="${esc(cn)}|${rTab}">${onWish(cn,rTab)?'&#10003;':'Wish'}</button>`}
     </div>`).join('')+'</div>';
-  wireAdds();
 }
-function wireAdds(){
-  wireAdds();
+
+function onWish(nm,hs){
+  return wish.some(w=>w.name.toLowerCase()===nm.toLowerCase()&&w.house.toLowerCase()===hs.toLowerCase());
 }
+function renderWish(){
+  const q=($('rSearch').value||'').trim().toLowerCase();
+  const list=wish.filter(w=>!q||(w.name+' '+w.house).toLowerCase().includes(q));
+  if(!wish.length){
+    $('rBody').innerHTML='<p style="opacity:.7">Nothing on the wish list yet. Browse the catalog and tap Wish on anything you want to try.</p>';
+    return;
+  }
+  $('rBody').innerHTML=list.map(w=>`<div class="lay">
+    <h4>${esc(w.name)}</h4>
+    <p class="ord">${esc(w.house)}${w.cloneOf?' &middot; copies '+esc(w.cloneOf):''}${w.added?' &middot; added '+new Date(w.added).toLocaleDateString():''}</p>
+    ${onShelf(w.name,w.house)?'<p class="why">You own this now.</p>':''}
+    <div class="mini">
+      <button data-add="${esc(w.name)}|${esc(w.house)}|${w.kind||'original'}|${esc(w.cloneOf||'')}">Move to my shelf</button>
+      <button data-unwish="${esc(w.name)}|${esc(w.house)}">Remove</button>
+    </div>
+  </div>`).join('')||'<p style="opacity:.7">Nothing matches that.</p>';
+}
+/* one delegated listener, so re-rendering can never orphan a handler */
+$('rBody').addEventListener('click',async e=>{
+  const b=e.target.closest('button');
+  if(!b||!$('rBody').contains(b))return;
+
+  if(b.dataset.r==='unpick'){rPick=null;return renderResearch();}
+  if(b.dataset.r==='allbrands'){rHouse='';return renderResearch();}
+  if(b.dataset.house){rHouse=b.dataset.house;return renderResearch();}
+  if(b.dataset.pick){
+    const [n,h,k]=b.dataset.pick.split('|');
+    rPick={name:n,house:h,kind:k};return renderResearch();
+  }
+  if(b.dataset.look&&rPick){
+    return window.open('https://www.fragrantica.com/search/?query='
+      +encodeURIComponent(rPick.name+' '+rPick.house),'_blank','noopener');
+  }
+  if(b.dataset.wish){
+    const [nm,hs]=b.dataset.wish.split('|');
+    if(onWish(nm,hs)){
+      wish=wish.filter(w=>!(w.name.toLowerCase()===nm.toLowerCase()&&w.house.toLowerCase()===hs.toLowerCase()));
+      await save();renderResearch();return toast('Off the list');
+    }
+    const cl=CLONES.find(c=>c[0].toLowerCase()===nm.toLowerCase());
+    const pr=PROF[(hs+' '+nm).toLowerCase()];
+    wish.push({name:nm,house:hs,kind:cl?'dupe':'original',
+      cloneOf:(pr&&pr[3])||'',added:Date.now()});
+    await save();renderResearch();return toast('On the wish list');
+  }
+  if(b.dataset.unwish){
+    const [nm,hs]=b.dataset.unwish.split('|');
+    wish=wish.filter(w=>!(w.name.toLowerCase()===nm.toLowerCase()&&w.house.toLowerCase()===hs.toLowerCase()));
+    await save();renderResearch();return toast('Removed');
+  }
+  if(b.dataset.add){
+    const [nm,hs,kind,clone]=b.dataset.add.split('|');
+    if(onShelf(nm,hs)){toast('Already on your shelf');return;}
+    snapTake('research add');
+    const pr=PROF[(hs+' '+nm).toLowerCase()];
+    items.push({id:'rf'+Math.random().toString(36).slice(2,10),name:nm,house:hs,
+      kind:kind||'original',format:'EDP',cloneOf:clone||(pr&&pr[3])||'',
+      paid:null,retail:RETAIL[(hs+' '+nm).toLowerCase()]||null,size:null,rating:null,
+      longevity:null,projection:null,compliments:null,
+      seasons:pr?SEASONS.filter(x=>(pr[1]||'').includes(x.slice(0,2).toUpperCase())):[],
+      vibes:pr?VIBES.filter(x=>(pr[2]||'').includes(x)):[],
+      fill:100,notes:pr?pr[0]:'',comment:'',photo:null,wears:0,lastWorn:null});
+    wish=wish.filter(w=>!(w.name.toLowerCase()===nm.toLowerCase()&&w.house.toLowerCase()===hs.toLowerCase()));
+    await save();buildLists();render();renderResearch();
+    return toast(nm+' added to your shelf');
+  }
+});
+
 function renderResearch(){
   renderTabs();
+  if(rTab==='Wish list')return renderWish();
   if(rTab==='Browse')return renderBrowse();
   if(rTab!=='Originals')return renderHouse();
   const q=($('rSearch').value||'').trim().toLowerCase();
@@ -1814,13 +1871,13 @@ function renderResearch(){
       ${cl.map(([cn,ch])=>`<div class="mini" style="align-items:center">
         <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">${esc(ch)}</span></span>
         ${onShelf(cn,ch)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
-          :`<button style="flex:1" data-add="${esc(cn)}|${esc(ch)}|dupe|${esc(nm)+' by '+esc(hs)}">Add</button>`}
+          :`<button style="flex:1" data-add="${esc(cn)}|${esc(ch)}|dupe|${esc(nm)+' by '+esc(hs)}">Add</button>
+             <button style="flex:1" data-wish="${esc(cn)}|${esc(ch)}">${onWish(cn,ch)?'&#10003;':'Wish'}</button>`}
       </div>`).join('')}
     </div>`).join('');
-  wireAdds();
 }
-$('mResearch').onclick=()=>{hide('menu');renderResearch();show('research');};
-$('rClose').onclick=()=>hide('research');
+$('mResearch').onclick=()=>{hide('menu');rPick=null;rHouse='';$('rSearch').value='';renderResearch();show('research');};
+$('rClose').onclick=()=>{rPick=null;rHouse='';hide('research');};
 $('rSearch').oninput=()=>{rPick=null;renderResearch();};
 
 /* ---------------- cleanup tools ---------------- */
@@ -1883,7 +1940,7 @@ const SNAP='shelf-snaps';
 function snapTake(label){
   try{
     const a=JSON.parse(localStorage.getItem(SNAP)||'[]');
-    a.unshift({when:Date.now(),label:label,items:items,blends:blends});
+    a.unshift({when:Date.now(),label:label,items:items,blends:blends,wish:wish});
     localStorage.setItem(SNAP,JSON.stringify(a.slice(0,3)));
   }catch(e){}
 }
@@ -1893,7 +1950,7 @@ async function snapUndo(){
   if(!a.length){toast('Nothing to undo');return;}
   const s0=a.shift();
   try{localStorage.setItem(SNAP,JSON.stringify(a));}catch(e){}
-  items=s0.items;blends=s0.blends||[];await save();buildLists();render();hide('menu');
+  items=s0.items;blends=s0.blends||[];wish=s0.wish||[];await save();buildLists();render();hide('menu');
   toast('Rolled back to '+s0.items.length+' bottles');
 }
 $('mUndo')&&($('mUndo').onclick=snapUndo);
@@ -1914,7 +1971,7 @@ function bkStampText(){
 function bkName(){return 'fragrance-shelf-'+bkStampText()+'.json';}
 /* Chrome Android blocks .json through the share sheet, so share it as text */
 function bkShareName(){return 'fragrance-shelf-'+bkStampText()+'.txt';}
-function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items,blends},null,2)],{type:'application/json'});}
+function bkBlob(){return new Blob([JSON.stringify({app:'shelf',version:1,items,blends,wish},null,2)],{type:'application/json'});}
 function bkStamp(){try{localStorage.setItem(BK,String(Date.now()));}catch(e){}dirtyClear();bkBar();bkLabel();}
 function bkAge(){try{const t=Number(localStorage.getItem(BK)||0);return t?Math.floor((Date.now()-t)/86400000):null;}catch(e){return null;}}
 function bkLabel(){
@@ -1939,7 +1996,7 @@ function bkDownload(){
   bkStamp();
 }
 async function bkShare(){
-  const txt=new Blob([JSON.stringify({app:'shelf',version:1,items,blends},null,2)],{type:'text/plain'});
+  const txt=new Blob([JSON.stringify({app:'shelf',version:1,items,blends,wish},null,2)],{type:'text/plain'});
   const file=new File([txt],bkShareName(),{type:'text/plain'});
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{
@@ -1966,7 +2023,7 @@ $('mFile').onchange=e=>{
       if(!d.items)throw 0;
       snapTake('restore');
       if(items.length&&!confirm('This replaces all '+items.length+' bottles on the shelf with the '+d.items.length+' in the file. Continue?')){toast('Left alone');return;}
-      items=d.items;blends=d.blends||[];await save();render();hide('menu');toast('Restored');
+      items=d.items;blends=d.blends||[];wish=d.wish||[];await save();render();hide('menu');toast('Restored');
     }catch(err){toast('That file did not read');}
   };
   fr.readAsText(f);
@@ -1975,7 +2032,7 @@ $('search').oninput=e=>{filter.q=e.target.value;render();};
 
 /* ---------------- boot ---------------- */
 async function save(){
-  const r=await store.set({app:'shelf',version:1,items,blends});
+  const r=await store.set({app:'shelf',version:1,items,blends,wish});
   try{dirtyBump();}catch(e){}
   return r;
 }
@@ -1984,6 +2041,7 @@ async function save(){
   const data=await store.get();
   items=(data&&data.items)||[];
   blends=(data&&data.blends)||[];
+  wish=(data&&data.wish)||[];
   buildChips();buildLists();render();dragWire();bkBar();bkLabel();checkBuild();
 })();
 document.addEventListener('keydown',e=>{
