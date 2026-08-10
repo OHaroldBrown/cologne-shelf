@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809262203</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809262207</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -474,7 +474,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809262203</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809262207</p>
     <div class="actions">
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
@@ -586,10 +586,10 @@ const CLONES=[
 ['Royal Amber','Orientica'],['Velvet Gold','Orientica'],['Amber Rouge','Orientica'],['Fabulous Oud','Orientica'],
 ['King','Bharara'],['Hayaati','Khadlaj'],['Oud Al Layl','Zimaya'],
 ['Sultan Malik','Zimaya'],['Ophylia','Nusuk'],
-['Ineffable','Oakcha'],['Why','Oakcha'],['Melting Embers','Oakcha'],
+['Ineffable','Oakcha'],['Why','Oakcha'],['Intoxicate Mystique','Khadlaj La Fede'],['Melting Embers','Oakcha'],
 ['Caribbean Waters','The Dua Brand'],['Imagine','The Dua Brand'],
 ['Nocturno Elixir','Rayhaan'],['Woody Sandalwood','Dossier'],
-['Royalty','Sentiment'],['Intoxicate Mystique','La Fede'],['Blue Nectar','Fragrance World'],
+['Royalty','Sentiment'],['Blue Nectar','Fragrance World'],
 ['Mousuf','Paris Corner'],['Emir Cafe Rouge','Paris Corner']
 ];
 const HOUSES=[
@@ -603,7 +603,7 @@ const HOUSES=[
 'Kilian','L Artisan Parfumeur','Lacoste','Lancome','Lattafa','Le Labo','Maison Alhambra',
 'Maison Francis Kurkdjian','Maison Margiela','Mancera','Memo Paris','Michael Kors','Montagne Parfums',
 'Montale','Montblanc','Moschino','Mugler','My Perfumes','Nasomatto','Nautica','Nishane','Nusuk','Oakcha',
-'Commodity','La Fede','Rayhaan','Sentiment','The Dua Brand',
+'Commodity','Khadlaj','La Fede','Rayhaan','Sentiment','The Dua Brand',
 'Orientica','Ormonde Jayne','Orto Parisi','Paco Rabanne','Paris Corner','Parfums de Marly','Penhaligons',
 'Porsche Design','Prada','Ralph Lauren','Rasasi','Riiffs','Roja Parfums','Salvatore Ferragamo',
 'Serge Lutens','Swiss Arabian','Tiziana Terenzi','Tom Ford','Tommy Hilfiger','Valentino','Van Cleef and Arpels',
@@ -1490,7 +1490,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809262203';
+const BUILD='0809262207';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1644,7 +1644,7 @@ const HOUSEREF={"Lattafa": [["Asad", "Dior Sauvage Elixir"], ["Khamrah", "Kilian
 let rTab='Browse';
 let rHouse='';
 let rPick=null;
-const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]]];
+const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]], ["Paradigme", "Prada", [["Intoxicate Mystique", "Khadlaj La Fede"]]]];
 function onShelf(nm,hs){
   return items.some(b=>(b.name||'').trim().toLowerCase()===nm.toLowerCase()
                     &&(b.house||'').trim().toLowerCase()===hs.toLowerCase());
