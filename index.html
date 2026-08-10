@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809261748</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809262156</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -326,6 +326,19 @@ input[type=file]{display:none}
     <button class="btn" id="dEdit">Edit</button>
   </div>
   <div class="sheetbody" id="dBody"></div>
+</section>
+
+<section class="sheet" id="research" aria-hidden="true">
+  <div class="sheetbar">
+    <button class="btn" id="rClose">Back</button>
+    <strong>Research</strong>
+  </div>
+  <div class="sheetbody">
+    <div class="chips" id="rTabs" style="margin-bottom:12px"></div>
+    <input type="text" id="rSearch" placeholder="Search a fragrance, house, or clone" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:14px">
+    <p class="hint" style="margin:0 0 14px">Well known originals and the clones the hobby broadly agrees on. Tap Add to put one on your shelf.</p>
+    <div id="rBody"></div>
+  </div>
 </section>
 
 <section class="sheet" id="help" aria-hidden="true">
@@ -461,8 +474,9 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809261748</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809262156</p>
     <div class="actions">
+      <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
       <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
       <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
@@ -1476,7 +1490,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809261748';
+const BUILD='0809262156';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1624,6 +1638,65 @@ $('mPrompt').onclick=async()=>{
     t.select();document.execCommand('copy');t.remove();toast('Prompt copied');
   }
 };
+
+/* ---------------- research ---------------- */
+const HOUSEREF={"Lattafa": [["Asad", "Dior Sauvage Elixir"], ["Khamrah", "Kilian Angels' Share"], ["Ana Abiyedh Rouge", "MFK Baccarat Rouge 540"], ["Aura", "MFK Baccarat Rouge 540"], ["Yara", "Van Cleef Orchidee Vanille"], ["Fakhar Black", "YSL Y EDP"], ["Bade'e Al Oud Oud for Glory", "Initio Oud for Greatness"], ["Ansaam Silver", "Azzaro The Most Wanted"], ["Asad Bourbon", "Azzaro The Most Wanted"], ["Art of Arabia I", "Louis Vuitton Imagination"], ["Blue Sapphire", "Versace Eros"], ["Eclaire", "Giardini di Toscana Bianco Latte"], ["Choco Overdose", "Montale Chocolate Greedy"], ["Confidential Platinum", "Chanel Allure Homme Sport"], ["Breeze", "MFK 724"], ["Art of Wood", "Parfums de Marly Perseus"], ["Atlas", "Orto Parisi Megamare"]], "Armaf": [["Club de Nuit Intense Man", "Creed Aventus"], ["Club de Nuit Sillage", "Creed Silver Mountain Water"], ["Club de Nuit Milestone", "Creed Millesime Imperial"], ["Club de Nuit Precieux", "Creed Aventus Absolu"], ["Club de Nuit Untold", "MFK Baccarat Rouge 540"], ["Club de Nuit Urban Man Elixir", "Dior Sauvage"], ["Club de Nuit Woman", "Chanel Coco Mademoiselle"], ["Tres Nuit", "Creed Green Irish Tweed"], ["Individuel", "Creed Original Santal"], ["Odyssey", "Paco Rabanne Invictus"], ["Craze", "Parfums de Marly Pegasus"], ["Craze Bleu", "Ralph Lauren Polo Blue"], ["Connoisseur Man", "YSL Y Le Parfum"]], "Dossier": [["Woody Sandalwood", "Le Labo Santal 33"], ["Ambery Saffron", "MFK Baccarat Rouge 540"], ["Ambery Vanilla", "YSL Black Opium"], ["Gourmand White Flowers", "Viktor & Rolf Flowerbomb"], ["Citrus Matcha", "Le Labo Matcha 26"], ["Ambery Tuberose", "Diptyque Do Son"]]};
+let rTab='Originals';
+const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]]];
+function onShelf(nm,hs){
+  return items.some(b=>(b.name||'').trim().toLowerCase()===nm.toLowerCase()
+                    &&(b.house||'').trim().toLowerCase()===hs.toLowerCase());
+}
+function renderTabs(){
+  const c=$('rTabs');c.innerHTML='';
+  ['Originals'].concat(Object.keys(HOUSEREF)).forEach(t=>{
+    const b=document.createElement('button');
+    b.className='chip';b.textContent=t;
+    b.setAttribute('aria-pressed',rTab===t);
+    b.onclick=()=>{rTab=t;renderResearch();};
+    c.appendChild(b);
+  });
+}
+function renderHouse(){
+  const q=($('rSearch').value||'').trim().toLowerCase();
+  const list=HOUSEREF[rTab].filter(([cn,og])=>!q||(cn+' '+og).toLowerCase().includes(q));
+  $('rBody').innerHTML = !list.length ? '<p style="opacity:.7">Nothing matches that.</p>' :
+    '<div class="lay">'+list.map(([cn,og])=>`<div class="mini" style="align-items:center;margin-bottom:10px">
+      <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">copies ${esc(og)}</span></span>
+      ${onShelf(cn,rTab)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
+        :`<button style="flex:1" data-add="${esc(cn)}|${rTab}|dupe|${esc(og)}">Add</button>`}
+    </div>`).join('')+'</div>';
+  wireAdds();
+}
+function wireAdds(){
+  wireAdds();
+}
+function renderResearch(){
+  renderTabs();
+  if(rTab!=='Originals')return renderHouse();
+  const q=($('rSearch').value||'').trim().toLowerCase();
+  const hit=REF.filter(([nm,hs,cl])=>{
+    if(!q)return true;
+    return (nm+' '+hs).toLowerCase().includes(q)
+      || cl.some(([cn,ch])=>(cn+' '+ch).toLowerCase().includes(q));
+  });
+  $('rBody').innerHTML = !hit.length ? '<p style="opacity:.7">Nothing matches that.</p>' :
+    hit.map(([nm,hs,cl])=>`<div class="lay">
+      <h4>${esc(nm)}</h4>
+      <p class="ord">${esc(hs)}${onShelf(nm,hs)?' &middot; on your shelf':''}</p>
+      ${onShelf(nm,hs)?'':`<div class="mini"><button data-add="${esc(nm)}|${esc(hs)}|original|">Add the original</button></div>`}
+      <p class="why" style="margin-top:10px">Widely agreed clones</p>
+      ${cl.map(([cn,ch])=>`<div class="mini" style="align-items:center">
+        <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">${esc(ch)}</span></span>
+        ${onShelf(cn,ch)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
+          :`<button style="flex:1" data-add="${esc(cn)}|${esc(ch)}|dupe|${esc(nm)+' by '+esc(hs)}">Add</button>`}
+      </div>`).join('')}
+    </div>`).join('');
+  wireAdds();
+}
+$('mResearch').onclick=()=>{hide('menu');renderResearch();show('research');};
+$('rClose').onclick=()=>hide('research');
+$('rSearch').oninput=renderResearch;
 
 /* ---------------- cleanup tools ---------------- */
 function dupKey(b){return ((b.name||'').trim().toLowerCase()+'|'+(b.house||'').trim().toLowerCase());}
