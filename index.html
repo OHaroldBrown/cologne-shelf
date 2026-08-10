@@ -311,7 +311,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0809262207</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0809262211</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -336,7 +336,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <div class="chips" id="rTabs" style="margin-bottom:12px"></div>
     <input type="text" id="rSearch" placeholder="Search a fragrance, house, or clone" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:14px">
-    <p class="hint" style="margin:0 0 14px">Well known originals and the clones the hobby broadly agrees on. Tap Add to put one on your shelf.</p>
+    <p class="hint" style="margin:0 0 14px">Confirmed means several sources agree or the house says so itself. Debated means widely claimed but the sources disagree, so treat it as a lead, not a fact.</p>
     <div id="rBody"></div>
   </div>
 </section>
@@ -474,7 +474,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0809262207</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0809262211</p>
     <div class="actions">
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
@@ -562,6 +562,7 @@ const ORIGINALS=[
 ['Cedrat Boise','Mancera',165],['Intense Cafe','Montale',160],
 ['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130],
 ['Bianco Latte','Giardini di Toscana',155],
+['Eternity','Calvin Klein',85],['Obsession','Calvin Klein',80],['CK One','Calvin Klein',75],['Escape','Calvin Klein',80],['Defy','Calvin Klein',95],['Eternity Aqua','Calvin Klein',90],['Sauvage','Dior',115],['Sauvage Elixir','Dior',185],['Dior Homme','Dior',130],['Dior Homme Intense','Dior',150],['Eau Sauvage','Dior',110],['Fahrenheit','Dior',120],['Bleu de Chanel','Chanel',135],['Allure Homme Sport','Chanel',115],['Egoiste','Chanel',120],['Antaeus','Chanel',120],['Coco Mademoiselle','Chanel',150],['Chance','Chanel',145],['Aqua di Gio','Giorgio Armani',95],['Aqua di Gio Profondo','Giorgio Armani',115],['Stronger With You','Giorgio Armani',95],['Code','Giorgio Armani',105],['Eros','Versace',105],['Eros Flame','Versace',110],['Dylan Blue','Versace',100],['The Most Wanted','Azzaro',115],['Chrome','Azzaro',95],['Wanted','Azzaro',100],['Invictus','Paco Rabanne',105],['1 Million','Paco Rabanne',105],['Phantom','Paco Rabanne',110],['Le Male','Jean Paul Gaultier',95],['Le Male Elixir','Jean Paul Gaultier',135],['Scandal Pour Homme','Jean Paul Gaultier',110],['Ultra Male','Jean Paul Gaultier',105],['La Nuit de L Homme','Yves Saint Laurent',110],['L Homme','Yves Saint Laurent',110],['MYSLF','Yves Saint Laurent',130],['Black Opium','Yves Saint Laurent',140],['Bad Boy','Carolina Herrera',105],['212 VIP','Carolina Herrera',100],['Good Girl','Carolina Herrera',125],['Luna Rossa Ocean','Prada',115],['L Homme Prada','Prada',115],['Boss Bottled','Hugo Boss',95],['The Scent','Hugo Boss',95],['Explorer','Montblanc',85],['Legend','Montblanc',85],['Spicebomb','Viktor and Rolf',110],['Spicebomb Extreme','Viktor and Rolf',130],['Flowerbomb','Viktor and Rolf',175],['Polo Blue','Ralph Lauren',95],['Polo Black','Ralph Lauren',95],['Pegasus','Parfums de Marly',355],['Althair','Parfums de Marly',355],['Percival','Parfums de Marly',355],['Oud for Greatness','Initio',380],['Side Effect','Initio',380],['Rehab','Initio',380],['Grand Soir','Maison Francis Kurkdjian',300],['724','Maison Francis Kurkdjian',225],['Amber Aoud','Roja Dove',595],['Elysium','Roja Dove',450],['Ombre Nomade','Louis Vuitton',380],['Afternoon Swim','Louis Vuitton',320],['Reflection Man','Amouage',390],['Interlude Man','Amouage',390],['Megamare','Orto Parisi',235],['Chocolate Greedy','Montale',150],['Orchidee Vanille','Van Cleef and Arpels',200],['Do Son','Diptyque',175],['Matcha 26','Le Labo',215],['Another 13','Le Labo',215],['Bergamote 22','Le Labo',215],['Millesime Imperial','Creed',445],['Original Santal','Creed',445],['Aventus Absolu','Creed',595],['Lost Cherry','Tom Ford',420],['Fucking Fabulous','Tom Ford',450],['Noir Extreme','Tom Ford',200],['Kirke','Tiziana Terenzi',290],['Angels Share','Kilian',300],['Black Phantom','Kilian',300],
 ['Gold','Commodity',155],['Book','Commodity',155],['Paper','Commodity',155],['Juice','Commodity',155],
 ['Imagination','Louis Vuitton',320],['Paradigme','Prada',140],
 ['Bleu de Chanel L Exclusif','Chanel',275],['Euphoria Men','Calvin Klein',100]
@@ -1490,7 +1491,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0809262207';
+const BUILD='0809262211';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1640,11 +1641,12 @@ $('mPrompt').onclick=async()=>{
 };
 
 /* ---------------- research ---------------- */
+const DEBATED=[["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Club de Nuit Sillage", "Armaf"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Club de Nuit Iconic", "Armaf"]]], ["Erba Pura", "Xerjoff", [["Club de Nuit Milestone", "Armaf"]]], ["Millesime Imperial", "Creed", [["Club de Nuit Milestone", "Armaf"]]], ["Scandal Pour Homme", "Jean Paul Gaultier", [["Club de Nuit Untold", "Armaf"]]], ["Lost Cherry", "Tom Ford", [["Cherry Smoothie", "Zara"]]], ["Ombre Nomade", "Louis Vuitton", [["Turathi Blue", "Afnan"]]], ["Delina", "Parfums de Marly", [["Yara", "Lattafa"]]], ["Aventus", "Creed", [["Black Creek", "La Rive"], ["Invincibile", "Tonino Lamborghini"]]]];
 const HOUSEREF={"Lattafa": [["Asad", "Dior Sauvage Elixir"], ["Khamrah", "Kilian Angels' Share"], ["Ana Abiyedh Rouge", "MFK Baccarat Rouge 540"], ["Aura", "MFK Baccarat Rouge 540"], ["Yara", "Van Cleef Orchidee Vanille"], ["Fakhar Black", "YSL Y EDP"], ["Bade'e Al Oud Oud for Glory", "Initio Oud for Greatness"], ["Ansaam Silver", "Azzaro The Most Wanted"], ["Asad Bourbon", "Azzaro The Most Wanted"], ["Art of Arabia I", "Louis Vuitton Imagination"], ["Blue Sapphire", "Versace Eros"], ["Eclaire", "Giardini di Toscana Bianco Latte"], ["Choco Overdose", "Montale Chocolate Greedy"], ["Confidential Platinum", "Chanel Allure Homme Sport"], ["Breeze", "MFK 724"], ["Art of Wood", "Parfums de Marly Perseus"], ["Atlas", "Orto Parisi Megamare"]], "Armaf": [["Club de Nuit Intense Man", "Creed Aventus"], ["Club de Nuit Sillage", "Creed Silver Mountain Water"], ["Club de Nuit Milestone", "Creed Millesime Imperial"], ["Club de Nuit Precieux", "Creed Aventus Absolu"], ["Club de Nuit Untold", "MFK Baccarat Rouge 540"], ["Club de Nuit Urban Man Elixir", "Dior Sauvage"], ["Club de Nuit Woman", "Chanel Coco Mademoiselle"], ["Tres Nuit", "Creed Green Irish Tweed"], ["Individuel", "Creed Original Santal"], ["Odyssey", "Paco Rabanne Invictus"], ["Craze", "Parfums de Marly Pegasus"], ["Craze Bleu", "Ralph Lauren Polo Blue"], ["Connoisseur Man", "YSL Y Le Parfum"]], "Dossier": [["Woody Sandalwood", "Le Labo Santal 33"], ["Ambery Saffron", "MFK Baccarat Rouge 540"], ["Ambery Vanilla", "YSL Black Opium"], ["Gourmand White Flowers", "Viktor & Rolf Flowerbomb"], ["Citrus Matcha", "Le Labo Matcha 26"], ["Ambery Tuberose", "Diptyque Do Son"]]};
 let rTab='Browse';
 let rHouse='';
 let rPick=null;
-const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Club de Nuit Iconic", "Armaf"], ["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]], ["Paradigme", "Prada", [["Intoxicate Mystique", "Khadlaj La Fede"]]]];
+const REF=[["Aventus", "Creed", [["Club de Nuit Intense Man", "Armaf"], ["Supremacy Silver", "Afnan"], ["Explorer", "Montblanc"], ["Vibrant Leather", "Zara"], ["Ineffable", "Oakcha"]]], ["Baccarat Rouge 540", "Maison Francis Kurkdjian", [["Ana Abiyedh Rouge", "Lattafa"], ["Club de Nuit Untold", "Armaf"], ["Ambery Saffron", "Dossier"], ["Red Temptation", "Zara"]]], ["Sauvage Elixir", "Dior", [["Asad", "Lattafa"]]], ["Angels' Share", "Kilian", [["Khamrah", "Lattafa"]]], ["Delina", "Parfums de Marly", [["Delilah", "Maison Alhambra"]]], ["Bleu de Chanel", "Chanel", [["Nocturno", "Rayhaan"]]], ["Ombre Leather", "Tom Ford", [["Amber & Leather", "Maison Alhambra"]]], ["Tobacco Vanille", "Tom Ford", [["Rich Warm Addictive", "Zara"]]], ["Oud Wood", "Tom Ford", [["Woody Oud", "Maison Alhambra"]]], ["Santal 33", "Le Labo", [["Woody Sandalwood", "Dossier"], ["Energetically New York", "Zara"]]], ["Green Irish Tweed", "Creed", [["Tres Nuit", "Armaf"], ["L'Aventure Knight", "Al Haramain"], ["Egra", "Rasasi"]]], ["Virgin Island Water", "Creed", [["Caribbean Waters", "The Dua Brand"]]], ["Replica By the Fireplace", "Maison Margiela", [["Melting Embers", "Oakcha"]]], ["Y", "Yves Saint Laurent", [["Why", "Oakcha"]]], ["Imagination", "Louis Vuitton", [["Imagine", "The Dua Brand"]]], ["Erba Pura", "Xerjoff", [["King", "Bharara"]]], ["Layton", "Parfums de Marly", [["Jorge", "Maison Alhambra"]]], ["Paradigme", "Prada", [["Intoxicate Mystique", "Khadlaj La Fede"]]]];
 function onShelf(nm,hs){
   return items.some(b=>(b.name||'').trim().toLowerCase()===nm.toLowerCase()
                     &&(b.house||'').trim().toLowerCase()===hs.toLowerCase());
@@ -1661,14 +1663,18 @@ function catalogAll(){
 function comparablesFor(nm,hs,kind){
   const full=(nm+' '+hs).toLowerCase(), name=nm.toLowerCase();
   const out=[];
-  const push=(n,h,why)=>{ if(!out.some(x=>x.name===n&&x.house===h))out.push({name:n,house:h,why:why}); };
+  const push=(n,h,why,deb)=>{ if(!out.some(x=>x.name===n&&x.house===h))out.push({name:n,house:h,why:why,debated:!!deb}); };
   if(kind==='original'){
     REF.forEach(([on,oh,cl])=>{ if(on.toLowerCase()===name)cl.forEach(([cn,ch])=>push(cn,ch,'clone of it')); });
+    DEBATED.forEach(([on,oh,cl])=>{ if(on.toLowerCase()===name)cl.forEach(([cn,ch])=>push(cn,ch,'clone of it',1)); });
     Object.keys(HOUSEREF).forEach(h=>HOUSEREF[h].forEach(([cn,og])=>{
       if(og.toLowerCase().includes(name))push(cn,h,'clone of it');
     }));
   }else{
     /* a properly structured original wins over a free text one */
+    DEBATED.forEach(([on,oh,cl])=>{
+      if(cl.some(([cn,ch])=>cn.toLowerCase()===name))push(on,oh,'it may copy this',1);
+    });
     REF.forEach(([on,oh,cl])=>{
       if(cl.some(([cn,ch])=>cn.toLowerCase()===name)){
         push(on,oh,'it copies this');
@@ -1705,16 +1711,20 @@ function renderPick(){
       ${pr?`<p class="why">${esc(pr[0])}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
       ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='it copies this')?comps.find(c=>c.why==='it copies this').name:'')}">Add to my shelf</button></div>`}
     </div>
+    <div class="mini" style="margin-bottom:4px"><button id="rLook">Look it up on Fragrantica</button></div>
     <h3 class="disp" style="margin:20px 0 10px">Comparable to</h3>
     ${comps.length?comps.map(c=>`<div class="lay">
       <div class="mini" style="align-items:center">
         <span style="flex:2;font-size:13px">${esc(c.name)}${c.house?'<br><span style="opacity:.65">'+esc(c.house)+'</span>':''}
           <br><span style="opacity:.55;font-size:12px">${esc(c.why)}</span></span>
+        ${c.debated?'<span class="tagcur" style="background:none;color:var(--ink);border:1px solid var(--line);opacity:.8">debated</span> ':''}
         ${c.house&&!onShelf(c.name,c.house)?`<button style="flex:1" data-add="${esc(c.name)}|${esc(c.house)}|${c.why==='it copies this'?'original':'dupe'}|">Add</button>`
           :'<span style="flex:1;font-size:12px;opacity:.6;text-align:right">'+(c.house?'on your shelf':'')+'</span>'}
       </div></div>`).join('')
       :'<p style="opacity:.7">Nothing confirmed for this one yet.</p>'}`;
   $('rBack').onclick=()=>{rPick=null;renderResearch();};
+  $('rLook').onclick=()=>window.open('https://www.fragrantica.com/search/?query='
+    +encodeURIComponent(it.name+' '+it.house),'_blank','noopener');
   wireAdds();
 }
 function renderBrowse(){
