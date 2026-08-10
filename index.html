@@ -78,6 +78,10 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #hBody h3{margin:26px 0 8px}
 #hBody h3:first-child{margin-top:0}
 #hBody p{line-height:1.6;margin:0 0 8px}
+.defs{display:none;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:8px;background:var(--panel)}
+.defs.on{display:block}
+.defs p{font-size:13px;line-height:1.55;margin:0 0 10px}
+.defs p:last-child{margin-bottom:0}
 .hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
 #stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
@@ -97,6 +101,10 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #hBody h3{margin:26px 0 8px}
 #hBody h3:first-child{margin-top:0}
 #hBody p{line-height:1.6;margin:0 0 8px}
+.defs{display:none;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:8px;background:var(--panel)}
+.defs.on{display:block}
+.defs p{font-size:13px;line-height:1.55;margin:0 0 10px}
+.defs p:last-child{margin-bottom:0}
 .hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
 #stNote{
   text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
@@ -311,7 +319,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0810261821</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0810261826</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -358,6 +366,18 @@ input[type=file]{display:none}
     </ol>
     <h3 class="disp">What the AI gets wrong</h3>
     <p>Retail prices drift and every model has a knowledge cutoff, so treat them as rough. Obscure clones often have no published notes, in which case use the original's accords, since that is what the clone is chasing. The prompt tells the AI to leave a cell blank rather than guess, and blank beats wrong here.</p>
+
+    <h3 class="disp">Formats, and what the strengths mean</h3>
+    <p>The format field is about how much perfume oil is in the bottle. More oil lasts longer and costs more. It does not mean it smells better.</p>
+    <ul class="help">
+      <li><strong>Extrait or parfum</strong>, the strongest, six to twelve hours, one or two sprays.</li>
+      <li><strong>Eau de parfum</strong>, five to eight hours, the default for most modern releases.</li>
+      <li><strong>Eau de toilette</strong>, three to five hours, brighter opening, fades sooner.</li>
+      <li><strong>Eau de cologne</strong>, one to two hours, the old citrus splash style.</li>
+      <li><strong>Oil and solid</strong>, no alcohol, quiet but long lasting on skin, and they go on first when you layer.</li>
+      <li><strong>Body spray and hair mist</strong>, light and short lived, supporting players.</li>
+    </ul>
+    <p>If the box does not say, pick eau de parfum. And do not read strength as quality, a well made EDT can outlast a weak EDP.</p>
 
     <h3 class="disp">Notes versus comments</h3>
     <p>Notes and accords should be scent words only, like pineapple, bergamot, birch, smoky woods. That field drives the layering suggestions. Put your own opinions in My comments instead.</p>
@@ -420,6 +440,19 @@ input[type=file]{display:none}
         <option value="Lotion">Lotion</option>
         <option value="Hair mist">Hair mist</option>
       </select>
+      <p class="hint"><button type="button" id="fmtHelp" style="background:none;border:none;padding:0;text-decoration:underline;color:var(--ink);opacity:.85;font-size:12px;cursor:pointer">What do these mean?</button></p>
+      <div id="fmtDefs" class="defs">
+        <p><strong>It is all about how much perfume oil is in the bottle.</strong> More oil means it lasts longer and costs more. It does not mean it smells better.</p>
+        <p><strong>Extrait</strong>, also called parfum. The strongest, roughly 20 to 40 percent oil. Six to twelve hours. Sits close to the skin at first, then blooms. One or two sprays is plenty.</p>
+        <p><strong>Eau de parfum</strong>, EDP. Around 15 to 20 percent. Five to eight hours. The default for most modern releases and the safest guess if the box does not say.</p>
+        <p><strong>Eau de toilette</strong>, EDT. Around 5 to 15 percent. Three to five hours. Brighter and sharper on the opening, fades sooner. Common for fresh and citrus scents.</p>
+        <p><strong>Eau de cologne</strong>. Around 2 to 5 percent. One to two hours. The old splash style, usually citrus and herbs. Not the same thing as calling a fragrance a cologne in everyday speech.</p>
+        <p><strong>Oil</strong>. No alcohol, so it stays on the skin instead of projecting. Long lasting up close, quiet from a distance. Goes on first when you layer.</p>
+        <p><strong>Solid</strong>. A balm in a tin. Very close to the skin, easy to travel with, easy to reapply.</p>
+        <p><strong>Body spray</strong>. Roughly 1 to 3 percent. An hour or two. Cheap, meant for after a shower or the gym bag rather than as your main scent.</p>
+        <p><strong>Hair mist</strong>. Low alcohol so it will not dry your hair out. Light and soft.</p>
+        <p style="opacity:.8">Two things worth knowing. Strength is not quality, a well made EDT can outlast a weak EDP. And houses label loosely, so if the box does not say, EDP is the sensible default.</p>
+      </div>
     </div>
     <div class="field" id="eCloneWrap" style="display:none">
       <label>Copy of</label><input type="text" id="eClone" list="originalList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="originalList"></datalist>
@@ -474,7 +507,7 @@ input[type=file]{display:none}
   <div class="sheetbody">
     <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
     <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0810261821</p>
+    <p class="lbl" style="margin:0 0 12px">BUILD 0810261826</p>
     <div class="actions">
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
@@ -1004,6 +1037,7 @@ $('dClose').onclick=()=>hide('detail');
 $('dEdit').onclick=()=>openEditor(editingId);
 
 /* ---------------- editor ---------------- */
+$('fmtHelp').onclick=()=>$('fmtDefs').classList.toggle('on');
 function buildRate10(){
   document.querySelectorAll('.rate10[data-for]').forEach(box=>{
     const fld=$(box.dataset.for);if(!fld)return;
@@ -1492,7 +1526,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0810261821';
+const BUILD='0810261826';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
