@@ -255,7 +255,7 @@ html[data-theme="dark"] .dial b.on{color:#0C1416}
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center
 }
 .btn.solid{background:var(--ink);color:var(--glass);border-radius:12px}
-.btn.wide{grid-column:1/-1}
+.btn.wide{grid-column:1/-1;display:block;width:100%;margin-bottom:8px}
 .btn.warn{border-color:var(--warn);color:var(--warn)}
 
 /* ---------- form ---------- */
@@ -339,7 +339,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0810262043</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0810262056</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -549,7 +549,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mUndo">Undo the last change</button>
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
 
-    <p class="lbl" style="margin:22px 0 0">BUILD 0810262043</p>
+    <p class="lbl" style="margin:22px 0 0">BUILD 0810262056</p>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
     <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
@@ -1589,7 +1589,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0810262043';
+const BUILD='0810262056';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -1815,7 +1815,7 @@ function renderPick(){
     <button class="btn" data-r="unpick" style="margin-bottom:12px">Back to the list</button>
     <div class="lay">
       <h4>${esc(it.name)}</h4>
-      <p class="ord">${esc(it.house)} &middot; ${it.kind==='dupe'?'a dupe':'an original'}${retail?' &middot; about $'+retail:''}${onShelf(it.name,it.house)?' &middot; on your shelf':''}</p>
+      <p class="ord">${esc(it.house)} &middot; ${it.kind==='dupe'?'a dupe':'an original'}${retail?' &middot; about $'+retail:''}${onShelf(it.name,it.house)?' &middot; <b style="color:var(--accent)">(on your shelf)</b>':''}</p>
       ${pr?`<p class="why">${esc(pr[0])}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
       ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='the original it copies')?comps.find(c=>c.why==='the original it copies').name:'')}">Add to my shelf</button>
         <button data-wish="${esc(it.name)}|${esc(it.house)}">${onWish(it.name,it.house)?'On the list':'Wish list'}</button></div>`}
@@ -1832,7 +1832,7 @@ function renderPick(){
         ${c.debated?'<span class="tagcur" style="background:none;color:var(--ink);border:1px solid var(--line);opacity:.8">debated</span> ':''}
         ${c.house&&!onShelf(c.name,c.house)?`<button style="flex:1" data-add="${esc(c.name)}|${esc(c.house)}|${c.why==='the original it copies'?'original':'dupe'}|">Add</button>
              <button style="flex:1" data-wish="${esc(c.name)}|${esc(c.house)}">${onWish(c.name,c.house)?'On the list':'Wish'}</button>`
-          :'<span style="flex:1;font-size:12px;opacity:.6;text-align:right">'+(c.house?'on your shelf':'')+'</span>'}
+          :'<span style="flex:1;font-size:12px;text-align:right;color:var(--accent);font-weight:800">'+(c.house?'(on your shelf)':'')+'</span>'}
       </div></div>`).join('')
       :'<p style="opacity:.7">Nothing confirmed for this one yet.</p>'}`;
 }
@@ -1863,14 +1863,15 @@ function renderBrowse(){
 function rowsFor(list){
   return '<div class="lay">'+list.map(x=>
     `<div class="mini" style="align-items:center;margin-bottom:8px">
-      <span style="flex:2;font-size:13px">${esc(x.name)}<br><span style="opacity:.65">${esc(x.house)}${x.copies?' &middot; copies '+esc(x.copies):(x.kind==='dupe'?' &middot; dupe':'')}</span></span>
+      <span style="flex:2;font-size:13px">${esc(x.name)}${onShelf(x.name,x.house)?' <b style="color:var(--accent)">(on your shelf)</b>':''}
+        <br><span style="opacity:.65">${esc(x.house)}${x.copies?' &middot; copies '+esc(x.copies):(x.kind==='dupe'?' &middot; dupe':'')}</span></span>
       <button style="flex:1" data-pick="${esc(x.name)}|${esc(x.house)}|${x.kind}">Look &rsaquo;</button>
     </div>`).join('')+'</div>';
 }
 
 function renderTabs(){
   const c=$('rTabs');c.innerHTML='';
-  ['Browse','Wish list','Originals'].forEach(t=>{
+  ['Browse','Dupe houses','Wish list','Originals'].forEach(t=>{
     const b=document.createElement('button');
     b.className='chip';b.textContent=t;
     b.setAttribute('aria-pressed',rTab===t);
@@ -1885,7 +1886,7 @@ function renderHouse(){
     '<div class="lay">'+list.map(([cn,og])=>`<div class="mini" style="align-items:center;margin-bottom:10px">
       <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">copies ${esc(og)}</span>
         ${sourceUrl(cn,rTab)?`<br><a href="${sourceUrl(cn,rTab)}" target="_blank" rel="noopener" style="color:var(--accent2);font-size:12px">view on the brand site</a>`:''}</span>
-      ${onShelf(cn,rTab)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
+      ${onShelf(cn,rTab)?'<span style="flex:1;font-size:12px;text-align:right;color:var(--accent);font-weight:800">(on your shelf)</span>'
         :`<button style="flex:1" data-add="${esc(cn)}|${rTab}|dupe|${esc(og)}">Add</button>
            <button style="flex:1" data-wish="${esc(cn)}|${rTab}">${onWish(cn,rTab)?'&#10003;':'Wish'}</button>`}
     </div>`).join('')+'</div>';
@@ -1904,6 +1905,24 @@ function sourceUrl(nm,hs){
 }
 function onWish(nm,hs){
   return wish.some(w=>w.name.toLowerCase()===nm.toLowerCase()&&w.house.toLowerCase()===hs.toLowerCase());
+}
+function renderDupeHouses(){
+  const q=($('rSearch').value||'').trim().toLowerCase();
+  const all=catalogAll();
+  const tally={};
+  all.forEach(x=>{ if(x.kind==='dupe')tally[x.house]=(tally[x.house]||0)+1; });
+  let names=Object.keys(tally).filter(h=>!q||h.toLowerCase().includes(q));
+  names.sort((a,b)=>tally[b]-tally[a]||a.localeCompare(b));
+  if(!names.length){$('rBody').innerHTML='<p style="opacity:.7">Nothing matches that.</p>';return;}
+  const withPairs=h=>all.filter(x=>x.house===h&&x.copies).length;
+  $('rBody').innerHTML='<p class="hint" style="margin:0 0 12px">Houses that make dupes, biggest first. Tap one for its full list.</p>'
+   +'<div class="lay">'+names.map(h=>{
+    const wp=withPairs(h);
+    return `<div class="mini" style="align-items:center;margin-bottom:10px">
+      <span style="flex:2;font-size:14px;font-weight:700">${esc(h)}
+        <br><span style="opacity:.65;font-size:12px;font-weight:400">${tally[h]} dupes, ${wp} paired to an original</span></span>
+      <button style="flex:1" data-dhouse="${esc(h)}">Open &rsaquo;</button>
+    </div>`;}).join('')+'</div>';
 }
 function renderWish(){
   const q=($('rSearch').value||'').trim().toLowerCase();
@@ -1930,6 +1949,7 @@ $('rBody').addEventListener('click',async e=>{
   if(b.dataset.r==='unpick'){rPick=null;return renderResearch();}
   if(b.dataset.r==='allbrands'){rHouse='';return renderResearch();}
   if(b.dataset.house){rHouse=b.dataset.house;return renderResearch();}
+  if(b.dataset.dhouse){rTab='Browse';rHouse=b.dataset.dhouse;rPick=null;return renderResearch();}
   if(b.dataset.pick){
     const [n,h,k]=b.dataset.pick.split('|');
     rPick={name:n,house:h,kind:k};return renderResearch();
@@ -1980,6 +2000,7 @@ $('rBody').addEventListener('click',async e=>{
 
 function renderResearch(){
   renderTabs();
+  if(rTab==='Dupe houses')return renderDupeHouses();
   if(rTab==='Wish list')return renderWish();
   if(rTab==='Browse')return renderBrowse();
   if(rTab!=='Originals')return renderHouse();
@@ -1992,12 +2013,12 @@ function renderResearch(){
   $('rBody').innerHTML = !hit.length ? '<p style="opacity:.7">Nothing matches that.</p>' :
     hit.map(([nm,hs,cl])=>`<div class="lay">
       <h4>${esc(nm)}</h4>
-      <p class="ord">${esc(hs)}${onShelf(nm,hs)?' &middot; on your shelf':''}</p>
+      <p class="ord">${esc(hs)}${onShelf(nm,hs)?' &middot; <b style="color:var(--accent)">(on your shelf)</b>':''}</p>
       ${onShelf(nm,hs)?'':`<div class="mini"><button data-add="${esc(nm)}|${esc(hs)}|original|">Add the original</button></div>`}
       <p class="why" style="margin-top:10px">Widely agreed dupes</p>
       ${cl.map(([cn,ch])=>`<div class="mini" style="align-items:center">
         <span style="flex:2;font-size:13px">${esc(cn)}<br><span style="opacity:.65">${esc(ch)}</span></span>
-        ${onShelf(cn,ch)?'<span style="flex:1;font-size:12px;opacity:.65;text-align:right">on your shelf</span>'
+        ${onShelf(cn,ch)?'<span style="flex:1;font-size:12px;text-align:right;color:var(--accent);font-weight:800">(on your shelf)</span>'
           :`<button style="flex:1" data-add="${esc(cn)}|${esc(ch)}|dupe|${esc(nm)+' by '+esc(hs)}">Add</button>
              <button style="flex:1" data-wish="${esc(cn)}|${esc(ch)}">${onWish(cn,ch)?'&#10003;':'Wish'}</button>`}
       </div>`).join('')}
