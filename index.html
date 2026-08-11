@@ -98,6 +98,12 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 .sheetbody h3.disp{font-weight:700}
 .card .flag{background:var(--warm);color:#141414;font-weight:800}
 html[data-theme="light"] .lay{background:#FFFFFF}
+.linkrow{display:none;gap:8px;margin:0 0 16px}
+.linkrow.on{display:flex}
+.linkrow button{
+  flex:1;padding:11px 10px;border:1px solid var(--accent);border-radius:12px;
+  background:var(--panel);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer}
+.linkrow button:active{opacity:.7}
 .grouphead{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
   color:var(--accent);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
@@ -339,7 +345,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0810262056</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0810262139</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -440,6 +446,7 @@ input[type=file]{display:none}
     </div>
     <div class="field"><label>Name</label><input type="text" id="eName" list="nameList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="nameList"></datalist></div>
     <div class="field"><label>House</label><input type="text" id="eHouse" list="houseList" autocapitalize="words" placeholder="Start typing, then pick"><datalist id="houseList"></datalist></div>
+    <div id="eLinks" class="linkrow"></div>
     <div class="field">
       <label>What is it</label>
       <select id="eKind">
@@ -549,7 +556,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mUndo">Undo the last change</button>
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
 
-    <p class="lbl" style="margin:22px 0 0">BUILD 0810262056</p>
+    <p class="lbl" style="margin:22px 0 0">BUILD 0810262139</p>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
     <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
@@ -1048,6 +1055,10 @@ function openDetail(id){
       ${it.notes?`<div class="row" style="display:block"><span class="k">Notes and accords</span><p style="margin:8px 0 0">${esc(it.notes)}</p></div>`:''}
       ${it.comment?`<div class="row" style="display:block"><span class="k">My comments</span><p style="margin:8px 0 0;white-space:pre-wrap">${esc(it.comment)}</p></div>`:''}
     </div>
+    <div class="linkrow on" id="dLinks">
+      ${sourceUrl(it.name,it.house)?`<button type="button" data-go="${sourceUrl(it.name,it.house)}">Open the brand page</button>`:''}
+      <button type="button" data-go="${webSearch(it.name,it.house)}">Look it up online</button>
+    </div>
     <div class="actions">
       <button class="btn solid wide" id="dWore">Wearing it today</button>
     </div>
@@ -1079,6 +1090,9 @@ function openDetail(id){
     await save();render();openDetail(id);
     toast(first?'Logged':'Wear logged for '+new Date(when).toLocaleDateString());
   };
+  $('dBody').querySelectorAll('#dLinks [data-go]').forEach(b=>{
+    b.onclick=()=>window.open(b.dataset.go,'_blank','noopener');
+  });
   $('dBody').querySelectorAll('.rateRow').forEach(r=>{
     r.onclick=()=>{
       openEditor(id);
@@ -1154,6 +1168,7 @@ function openEditor(id){
   pickerRow($('eSeasons'),SEASONS,it?it.seasons||[]:[]);
   pickerRow($('eVibes'),VIBES,it?it.vibes||[]:[]);
   $('eCloneWrap').style.display=$('eKind').value==='dupe'?'block':'none';
+  paintLinks();
   $('eDelete').style.display=it?'block':'none';
   paintPreview();
   hide('detail');show('editor');
@@ -1164,6 +1179,26 @@ function paintPreview(){
   else{p.style.display='none';$('ePhotoClear').style.display='none';$('ePhotoBtn').textContent='Add photo';}
 }
 $('eKind').onchange=()=>{$('eCloneWrap').style.display=$('eKind').value==='dupe'?'block':'none';};
+function webSearch(nm,hs){
+  return 'https://www.google.com/search?q='+encodeURIComponent((nm+' '+hs).trim()+' fragrance notes review');
+}
+function paintLinks(){
+  const box=$('eLinks');if(!box)return;
+  const nm=($('eName').value||'').trim(), hs=($('eHouse').value||'').trim();
+  if(!nm){box.className='linkrow';box.innerHTML='';return;}
+  const src=sourceUrl(nm,hs);
+  box.innerHTML=(src?`<button type="button" data-go="${src}">Open the brand page</button>`:'')
+    +`<button type="button" data-go="${webSearch(nm,hs)}">Look it up online</button>`;
+  box.className='linkrow on';
+  box.querySelectorAll('[data-go]').forEach(b=>{
+    b.onclick=()=>window.open(b.dataset.go,'_blank','noopener');
+  });
+}
+$('eName').addEventListener('input',paintLinks);
+$('eHouse').addEventListener('input',paintLinks);
+$('eName').addEventListener('change',paintLinks);
+$('eHouse').addEventListener('change',paintLinks);
+
 function matched(v){const k=(v||'').trim().toLowerCase();return HOUSEOF[k]?k:null;}
 function setPicker(el,vals){
   [...el.querySelectorAll('.pick')].forEach(b=>{
@@ -1589,7 +1624,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0810262056';
+const BUILD='0810262139';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
