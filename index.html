@@ -28,7 +28,8 @@
   --ink:#000000;
   --line:#AEBAB7;
   --accent2:#2A6F97;
-  --tint:#DCE6E4;
+  --warm:#B0761F;
+  --tint:#DDE7E5;
   --accent:#0E6E70;
   --onAccent:#FFFFFF;
   --vetiver:#1F4A3D;
@@ -41,6 +42,7 @@ html[data-theme="dark"]{
   --ink:#FFFFFF;
   --line:#2C4249;
   --accent2:#5AA9E6;
+  --warm:#E0A458;
   --tint:#1B2F36;
   --accent:#4FD1C5;
   --onAccent:#0C1416;
@@ -71,10 +73,11 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
 .ratelbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
-.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
+.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:4px}
 .rate10 button{
-  padding:9px 0;border:1px solid var(--line);border-radius:12px;background:none;
-  color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+  padding:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--tint);
+  color:var(--ink);font-size:13px;font-weight:700;cursor:pointer;min-width:0}
+@media(max-width:400px){.rate10{gap:2px}.rate10 button{font-size:12px;padding:9px 0}}
 .rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 .rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
 .help{padding-left:20px;margin:0 0 8px}
@@ -86,6 +89,20 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
   background:var(--tint);color:var(--ink);border:1px solid var(--line);
   border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer}
 .sheetbody button:not(.chip):not(.btn):not(.iconbtn):active{background:var(--panel)}
+.ledger .v{font-weight:800}
+#stSaved{color:var(--warm)}
+#stBottles{color:var(--accent2)}
+.row .score{font-weight:800;color:var(--accent);font-size:1.05em}
+.tagcur{background:var(--warm);color:#141414}
+.lay h4{font-weight:800}
+.sheetbody h3.disp{font-weight:700}
+.card .flag{background:var(--warm);color:#141414;font-weight:800}
+html[data-theme="light"] .lay{background:#FFFFFF}
+.grouphead{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  color:var(--accent);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.grouphead:first-child{margin-top:0}
+.grouphead.danger{color:var(--warn);border-color:var(--warn)}
 .helpbtn{
   display:block;width:100%;margin-top:10px;padding:14px 16px;
   background:var(--panel);border:1px solid var(--accent);border-radius:14px;
@@ -102,36 +119,8 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #build{
   text-align:center;padding:22px 0 30px;font-size:11px;letter-spacing:.12em;line-height:1.9;
   color:var(--ink);opacity:.55}
-@media print{.ratelbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
-.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:4px}
-.rate10 button{
-  padding:9px 0;border:1px solid var(--line);border-radius:12px;background:none;
-  color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
-.rate10 button[aria-pressed="true"]{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
-.rate10 button.lit{background:var(--accent);color:var(--onAccent);border-color:var(--accent);opacity:.45}
-.help{padding-left:20px;margin:0 0 8px}
-.help li{margin-bottom:12px;line-height:1.55}
-#hBody h3{margin:26px 0 8px}
-#hBody h3:first-child{margin-top:0}
-#hBody p{line-height:1.6;margin:0 0 8px}
-.sheetbody button:not(.chip):not(.btn):not(.iconbtn){
-  background:var(--tint);color:var(--ink);border:1px solid var(--line);
-  border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer}
-.sheetbody button:not(.chip):not(.btn):not(.iconbtn):active{background:var(--panel)}
-.helpbtn{
-  display:block;width:100%;margin-top:10px;padding:14px 16px;
-  background:var(--panel);border:1px solid var(--accent);border-radius:14px;
-  color:var(--accent);font-size:15px;font-weight:600;letter-spacing:.02em;cursor:pointer;text-align:left}
-.helpbtn:active{opacity:.75}
-.defs{display:none;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:10px;background:var(--panel)}
-.defs.on{display:block}
-.defs p{font-size:15px;line-height:1.7;margin:0 0 14px}
-.defs p:last-child{margin-bottom:0}
-.hint{font-size:12px;opacity:.7;margin:6px 0 0;color:var(--ink)}
-#stNote{
-  text-align:center;margin:0;padding:6px 14px 0;font-size:12px;opacity:.7;color:var(--ink)}
-#stNote:empty{display:none}
-#build{opacity:1}}
+@media print{#bkBar{display:none!important}#build{opacity:1}}
+
 /* ---------- header ---------- */
 header{
   position:sticky;top:0;z-index:40;background:var(--glass);
@@ -233,10 +222,12 @@ body.arrange .card{cursor:grab;touch-action:none;user-select:none}
 .chouse{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-top:4px}
 .dial{display:flex;gap:3px;margin-top:8px;align-items:center}
 .dial b{
-  width:20px;height:14px;border:1px solid var(--line);display:grid;place-items:center;
+  width:22px;height:16px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;
   font-size:8px;font-weight:700;letter-spacing:.04em
 }
+#detail .dial b{width:30px;height:22px;font-size:10px;border-radius:7px}
 .dial b.on{background:var(--vetiver);border-color:var(--vetiver);color:var(--glass)}
+.chip[aria-pressed="true"]{border-color:var(--accent)}
 html[data-theme="dark"] .dial b.on{color:#0C1416}
 
 /* ---------- sheet ---------- */
@@ -260,10 +251,10 @@ html[data-theme="dark"] .dial b.on{color:#0C1416}
 .row .v.txt{font-family:"Karla",sans-serif;font-size:14px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .btn{
-  border:1px solid var(--ink);background:none;padding:12px 10px;cursor:pointer;
+  border:1px solid var(--ink);background:none;padding:12px 14px;cursor:pointer;border-radius:12px;
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center
 }
-.btn.solid{background:var(--ink);color:var(--glass)}
+.btn.solid{background:var(--ink);color:var(--glass);border-radius:12px}
 .btn.wide{grid-column:1/-1}
 .btn.warn{border-color:var(--warn);color:var(--warn)}
 
@@ -348,7 +339,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0810262022</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0810262043</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -492,9 +483,9 @@ input[type=file]{display:none}
       <div class="field"><label>Original retail</label><input type="number" id="eRetail" inputmode="decimal" placeholder="435"></div>
     </div>
     <div class="field"><label>Size ml</label><input type="number" id="eSize" inputmode="numeric" placeholder="100"></div>
-    <div class="field">
+    <div class="field ratewrap">
       <label>My rating</label>
-      <div class="ratelbl">Overall</div>
+      <div class="ratelbl">Overall rating</div>
       <div class="rate10" data-for="eRating"></div>
       <div class="ratelbl">Longevity</div>
       <div class="rate10" data-for="eLong"></div>
@@ -530,32 +521,37 @@ input[type=file]{display:none}
 <section class="sheet" id="menu" aria-hidden="true">
   <div class="sheetbar">
     <button class="btn" id="mClose">Back</button>
-    <strong class="lbl">Backup</strong>
-    <span></span>
+    <strong>Settings</strong>
   </div>
   <div class="sheetbody">
-    <p>Your shelf lives on this device only. Send a backup to Drive before you switch phones or clear your browser.</p>
-    <p class="lbl" id="mLast" style="margin:0 0 12px"></p>
-    <p class="lbl" style="margin:0 0 12px">BUILD 0810262022</p>
-    <div class="actions">
+    <p class="grouphead">Explore</p>
       <button class="btn wide" id="mResearch">Research</button>
       <button class="btn wide" id="mHelp">Getting started</button>
-      <button class="btn wide" id="mLayers" style="margin-bottom:14px">Layering</button>
-      <button class="btn wide solid" id="mDrive">Send a backup to Google Drive</button>
+      <button class="btn wide" id="mLayers">Layering</button>
+
+    <p class="grouphead">Backup</p>
+    <p class="hint" style="margin:0 0 10px">Your shelf lives on this device only. Send a backup before you switch phones or clear your browser.</p>
+    <p class="lbl" id="mLast" style="margin:0 0 10px"></p>
+      <button class="btn wide" id="mDrive">Send a backup to Google Drive</button>
       <button class="btn wide" id="mExport">Save a backup file to this device</button>
       <button class="btn wide" id="mImport">Restore from a backup file</button>
-      <button class="btn wide" id="mPrint">Print the shelf list</button>
+
+    <p class="grouphead">Spreadsheets</p>
       <button class="btn wide" id="mCsvIn">Import a spreadsheet</button>
       <button class="btn wide" id="mCsvOut">Export as a spreadsheet</button>
       <button class="btn wide" id="mPrompt">Copy the AI prompt</button>
-      <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
-      <button class="btn wide" id="mUndo">Undo the last change</button>
+
+    <p class="grouphead">Shelf tools</p>
+      <button class="btn wide" id="mPrint">Print the shelf list</button>
       <button class="btn wide" id="mDedupe">Merge duplicates</button>
+
+    <p class="grouphead danger">Careful</p>
+      <button class="btn wide" id="mUndo">Undo the last change</button>
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
-    </div>
-    <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain">
-    <p class="lbl" style="margin-top:24px">Add to home screen</p>
-    <p>iPhone, open in Safari, tap Share, then Add to Home Screen. Android, open in Chrome, tap the menu, then Add to Home screen. It then opens like an app.</p>
+
+    <p class="lbl" style="margin:22px 0 0">BUILD 0810262043</p>
+    <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
+    <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
 </section>
 
@@ -1025,13 +1021,22 @@ function openDetail(id){
       ${row('Size',it.size?it.size+' ml':'')}
       ${known&&it.paid&&it.size?row('Cost per ml','$'+(it.paid/it.size).toFixed(2)):''}
       ${row('Format',fmtOf(it),true)}
-      <div class="row" id="dRateRow" style="cursor:pointer">
-        <span class="k">Overall</span>
-        <span class="v txt">${it.rating?it.rating+' / 10':'tap to rate'}</span>
+      <div class="row rateRow" style="cursor:pointer">
+        <span class="k">Overall rating</span>
+        <span class="v txt">${it.rating?'<b class="score">'+it.rating+'</b> / 10':'tap to rate'}</span>
       </div>
-      ${row('Longevity',it.longevity?it.longevity+' / 10':'',true)}
-      ${row('Projection',it.projection?it.projection+' / 10':'',true)}
-      ${row('Compliments',it.compliments?it.compliments+' / 10':'',true)}
+      <div class="row rateRow" style="cursor:pointer">
+        <span class="k">Longevity</span>
+        <span class="v txt">${it.longevity?'<b class="score">'+it.longevity+'</b> / 10':'not rated'}</span>
+      </div>
+      <div class="row rateRow" style="cursor:pointer">
+        <span class="k">Projection</span>
+        <span class="v txt">${it.projection?'<b class="score">'+it.projection+'</b> / 10':'not rated'}</span>
+      </div>
+      <div class="row rateRow" style="cursor:pointer">
+        <span class="k">Compliments</span>
+        <span class="v txt">${it.compliments?'<b class="score">'+it.compliments+'</b> / 10':'not rated'}</span>
+      </div>
       ${row('Reach for it',(it.vibes||[]).join(', '),true)}
       ${row('Bottle left',(it.fill==null?100:it.fill)+'%')}
       <div class="row" id="dWornRow" style="cursor:pointer">
@@ -1074,12 +1079,16 @@ function openDetail(id){
     await save();render();openDetail(id);
     toast(first?'Logged':'Wear logged for '+new Date(when).toLocaleDateString());
   };
-  $('dRateRow').onclick=async()=>{
-    const v=prompt('Rate '+(it.name||'this one')+' from 1 to 10. Blank clears it.', it.rating||'');
-    if(v===null)return;
-    it.rating = v.trim()==='' ? null : Math.max(1,Math.min(10,Number(v)||0));
-    await save();openDetail(id);
-  };
+  $('dBody').querySelectorAll('.rateRow').forEach(r=>{
+    r.onclick=()=>{
+      openEditor(id);
+      setTimeout(()=>{
+        const t=document.querySelector('#editor .ratewrap');
+        if(t&&t.scrollIntoView)try{t.scrollIntoView({behavior:'smooth',block:'start'});}
+          catch(e){$('editor').scrollTop=t.offsetTop-12;}
+      },80);
+    };
+  });
   $('dWore').onclick=async()=>{
     it.lastWorn=Date.now();it.wears=(it.wears||0)+1;
     if(it.fill!=null&&it.fill>0)it.fill=Math.max(0,it.fill-1);
@@ -1580,7 +1589,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0810262022';
+const BUILD='0810262043';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
