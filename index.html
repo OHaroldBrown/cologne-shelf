@@ -72,24 +72,27 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 #bkBar button{background:none;border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:15px}
 #bkBar button.go{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
 @media print{#bkBar{display:none!important}}
-.ratelbl{font-size:16px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
+.ratelbl{font-size:13px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin:12px 0 2px}
 .rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:4px}
 .rate10 button{
   padding:11px 0;border:1px solid var(--line);border-radius:10px;background:var(--tint);
-  color:var(--ink);font-size:15px;font-weight:700;cursor:pointer;min-width:0}
-@media(max-width:400px){.rate10{gap:2px}.rate10 button{font-size:16px;padding:9px 0}}
+  color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;min-width:0}
+@media(max-width:400px){.rate10{gap:2px}.rate10 button{font-size:13px;padding:10px 0}}
+#editor .rate10 button[aria-pressed="true"],
+#editor .rate10 button.lit,
 .rate10 button[aria-pressed="true"],
 .rate10 button.lit{
-  background:var(--ink);color:var(--glass);border-color:var(--ink);font-weight:800}
+  background:var(--ink)!important;color:var(--glass)!important;
+  border-color:var(--ink)!important;font-weight:800}
 .help{padding-left:20px;margin:0 0 8px}
 .help li{margin-bottom:12px;line-height:1.55}
 #hBody h3{margin:26px 0 8px}
 #hBody h3:first-child{margin-top:0}
 #hBody p{line-height:1.6;margin:0 0 8px}
-.sheetbody button:not(.chip):not(.btn):not(.iconbtn){
+.sheetbody :not(.rate10) > button:not(.chip):not(.btn):not(.iconbtn):not(.pick){
   background:var(--tint);color:var(--ink);border:1px solid var(--line);
   border-radius:12px;padding:10px 12px;font-size:16px;cursor:pointer}
-.sheetbody button:not(.chip):not(.btn):not(.iconbtn):active{background:var(--panel)}
+.sheetbody :not(.rate10) > button:not(.chip):not(.btn):not(.iconbtn):not(.pick):active{background:var(--panel)}
 .ledger .v{font-weight:800}
 #stSaved{color:var(--warm)}
 #stBottles{color:var(--accent2)}
@@ -107,8 +110,8 @@ html[data-theme="light"] .lay{background:#FFFFFF}
 .linkrow button:active{opacity:.7}
 .gset{margin-bottom:26px}
 .gset .btn.wide{
-  border-width:2px;border-color:var(--gc);color:var(--gc);
-  background:var(--panel);position:relative;padding-left:20px;text-align:left}
+  border-width:2px;border-color:var(--gc);color:var(--gc);font-size:12px;
+  background:var(--panel);position:relative;padding:14px 12px 14px 20px;text-align:left}
 .gset .btn.wide::before{
   content:'';position:absolute;left:0;top:8px;bottom:8px;width:4px;
   border-radius:0 4px 4px 0;background:var(--gc)}
@@ -120,7 +123,7 @@ html[data-theme="light"] .lay{background:#FFFFFF}
 .gset.tools{--gc:var(--vetiver)}
 .gset.careful{--gc:var(--warn)}
 .grouphead{
-  font-size:15px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
   color:var(--accent);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
 .grouphead:first-child{margin-top:0}
 .grouphead.danger{color:var(--warn);border-color:var(--warn)}
@@ -206,6 +209,7 @@ body.arrange .card{cursor:grab;touch-action:none;user-select:none}
 .sheetbody h3.disp{color:var(--accent)}
 .lay{border-left:3px solid var(--accent2)}
 .lay h4{color:var(--ink)}
+
 .chip{
   white-space:nowrap;border:1px solid var(--line);background:none;border-radius:999px;
   padding:6px 12px;font-size:15px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer
@@ -267,13 +271,13 @@ html[data-theme="dark"] .dial b.on{color:#0C1416}
 .dhouse{font-size:15px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-top:6px}
 .rows{margin-top:18px;border-top:1px solid var(--line)}
 .row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
-.row .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding-top:3px}
-.row .v{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:16px}
+.row .k{font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding-top:2px}
+.row .v{font-size:15px;text-align:right;font-family:"IBM Plex Mono",monospace}
 .row .v.txt{font-family:"Karla",sans-serif;font-size:16px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .btn{
   border:1px solid var(--ink);background:none;padding:12px 14px;cursor:pointer;border-radius:12px;
-  font-size:15px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center
 }
 .btn.solid{background:var(--ink);color:var(--glass);border-radius:12px}
 .btn.wide{grid-column:1/-1;display:block;width:100%;margin-bottom:8px}
@@ -290,10 +294,13 @@ html[data-theme="dark"] .dial b.on{color:#0C1416}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pickers{display:flex;flex-wrap:wrap;gap:6px}
 .pick{
-  border:1px solid var(--line);background:none;padding:8px 11px;cursor:pointer;
-  font-size:15px;letter-spacing:.1em;text-transform:uppercase;font-weight:700
+  border:1px solid var(--line);background:none;padding:9px 13px;cursor:pointer;
+  font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700
 }
-.pick[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--glass);font-weight:800}
+.pick[aria-pressed="true"],
+#editor .pick[aria-pressed="true"]{
+  background:var(--ink)!important;border-color:var(--ink)!important;
+  color:var(--glass)!important;font-weight:800}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .photobox{display:flex;gap:10px;align-items:center;margin-top:6px}
 .photobox img{width:74px;height:98px;object-fit:cover;border:1px solid var(--line)}
@@ -359,7 +366,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0812261157</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0812261210</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -575,7 +582,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
 
     </div>
-    <p class="lbl" style="margin:22px 0 0">BUILD 0812261157</p>
+    <p class="lbl" style="margin:22px 0 0">BUILD 0812261210</p>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
     <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
@@ -1657,7 +1664,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0812261157';
+const BUILD='0812261210';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
