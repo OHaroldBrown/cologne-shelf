@@ -102,7 +102,8 @@ button,input,select,textarea{font:inherit;color:var(--ink)}
 .sheetbody h3.disp{font-weight:700}
 .card .flag{background:var(--warm);color:#141414;font-weight:800}
 html[data-theme="light"] .lay{background:#FFFFFF}
-.linkrow{display:none;gap:8px;margin:0 0 16px}
+.linkrow{display:none;gap:10px;margin:14px 0 16px}
+.linkrow button{flex:1 1 0;min-width:0}
 .linkrow.on{display:flex}
 .linkrow button{
   flex:1;padding:11px 10px;border:1px solid var(--accent);border-radius:12px;
@@ -122,6 +123,11 @@ html[data-theme="light"] .lay{background:#FFFFFF}
 .gset.sheets{--gc:var(--warm)}
 .gset.tools{--gc:var(--vetiver)}
 .gset.careful{--gc:var(--warn)}
+.unver{
+  display:inline-block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:800;padding:3px 8px;border-radius:20px;margin-left:8px;
+  background:var(--warm);color:#141414;vertical-align:middle}
+.unvernote{font-size:12px;opacity:.75;margin:6px 0 0}
 .grouphead{
   font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
   color:var(--accent);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
@@ -367,7 +373,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0812261223</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0812261425</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -538,7 +544,7 @@ input[type=file]{display:none}
       <input type="range" id="eFill" min="0" max="100" step="5" value="100">
     </div>
     <div class="field"><label>Notes and accords</label><textarea id="eNotes"></textarea>
-      <p class="hint">These drive the layering suggestions, so keep them scent notes.</p></div>
+      <p class="hint">These drive the layering suggestions, so keep them scent notes. Anything tagged unverified came from general knowledge rather than the house, so correct it if you know better.</p></div>
     <div class="field"><label>My comments</label><textarea id="eComment"></textarea></div>
     <div class="actions">
       <button class="btn warn wide" id="eDelete" style="display:none">Delete this bottle</button>
@@ -583,7 +589,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
 
     </div>
-    <p class="lbl" style="margin:22px 0 0">BUILD 0812261223</p>
+    <p class="lbl" style="margin:22px 0 0">BUILD 0812261425</p>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
     <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
@@ -886,11 +892,11 @@ function buildLists(){
 /* PROFILES: accords, seasons, occasions, and for clones the original it is
    usually compared to. Everything here is a starting point you can edit. */
 const PROF={
-'creed aventus':['Pineapple, bergamot, blackcurrant, birch, smoky oakmoss, musk','SP SU FA','Office Night Date Dressy'],
+'creed aventus':['Bergamot, blackcurrant, apple, lemon, pink pepper, pineapple, patchouli, jasmine, birch, musk, oakmoss, ambroxan','SP SU FA','Office Night Date Dressy','',1],
 'creed green irish tweed':['Lemon, violet leaf, iris, sandalwood, ambergris','SP SU','Office Dressy Casual'],
 'creed silver mountain water':['Bergamot, green tea, blackcurrant, sandalwood, musk','SP SU','Office Casual Travel'],
 'creed virgin island water':['Lime, coconut, white rum, ginger, sugar cane','SU','Casual Travel'],
-'dior sauvage edt':['Bergamot, pepper, lavender, ambroxan, cedar','SP SU FA','Office Casual Date'],
+'dior sauvage edt':['Bergamot, pepper, Sichuan pepper, lavender, geranium, patchouli, ambroxan, cedar','SP SU FA','Office Casual Date','',1],
 'dior sauvage elixir':['Grapefruit, cinnamon, nutmeg, lavender, licorice, amber','FA WI','Night Date Dressy'],
 'dior homme intense':['Iris, lavender, pear, ambrette, vetiver, vanilla','FA WI','Dressy Office Date'],
 'dior fahrenheit':['Violet leaf, gasoline accord, leather, nutmeg, cedar','FA WI','Night Dressy'],
@@ -963,7 +969,7 @@ const PROF={
 'oakcha melting embers':['Chestnut, clove, smoke, vanilla, guaiac wood','FA WI','Casual Night','Maison Margiela By the Fireplace'],
 'the dua brand caribbean waters':['Lime, coconut, white rum, ginger, sugar cane','SU','Casual Travel','Creed Virgin Island Water'],
 'the dua brand imagine':['Bergamot, citrus, black tea, ginger, ambroxan, sandalwood','SP SU FA','Office Casual Date Travel','Louis Vuitton Imagination'],
-'rayhaan nocturno elixir':['Citrus, incense, cedar, sandalwood, amber','SP SU FA WI','Office Dressy Date','Chanel Bleu de Chanel L Exclusif'],
+'rayhaan nocturno elixir':['Lemon zest, bergamot, mint, artemisia, lavender, geranium, pineapple, sandalwood','SP SU FA WI','Office Dressy Date','Chanel Bleu de Chanel L Exclusif',1],
 'dossier woody sandalwood':['Violet leaf, cardamom, orris, ambrox, cedar, sandalwood, musk','FA WI SP','Casual Office Dressy','Le Labo Santal 33']
 };
 const SEASONCODE={SP:'Spring',SU:'Summer',FA:'Fall',WI:'Winter'};
@@ -1247,7 +1253,8 @@ function openDetail(id){
       </div>
       <input type="date" id="dWornPick" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none">
       ${row('Times worn',it.wears||0)}
-      ${it.notes?`<div class="row" style="display:block"><span class="k">Notes and accords</span><p style="margin:8px 0 0">${esc(it.notes)}</p></div>`:''}
+      ${it.notes?`<div class="row" style="display:block"><span class="k">Notes and accords</span>
+        <p style="margin:8px 0 0">${esc(it.notes)}${(!it.notesEdited&&!notesVerified(it.house,it.name))?'<span class="unver">unverified</span>':''}</p></div>`:''}
       ${it.comment?`<div class="row" style="display:block"><span class="k">My comments</span><p style="margin:8px 0 0;white-space:pre-wrap">${esc(it.comment)}</p></div>`:''}
     </div>
     <div class="linkrow on" id="dLinks">
@@ -1357,6 +1364,7 @@ function openEditor(id){
   $('eComp').value=it&&it.compliments!=null?it.compliments:'';
   buildRate10();
   $('eNotes').value=it?it.notes||'':'';
+  $('eNotes').dataset.filled=$('eNotes').value;
   $('eComment').value=it?it.comment||'':'';
   $('eFill').value=it&&it.fill!=null?it.fill:100;
   $('eFillVal').textContent=$('eFill').value+'%';
@@ -1410,7 +1418,7 @@ function applyProfile(k){
     if(!$('eNotes').value.trim()&&SCRAPED[k])$('eNotes').value=SCRAPED[k];
     return;
   }
-  if(!$('eNotes').value.trim())$('eNotes').value=p[0]||SCRAPED[k]||'';
+  if(!$('eNotes').value.trim()){$('eNotes').value=p[0]||SCRAPED[k]||'';$('eNotes').dataset.filled=$('eNotes').value;}
   if(!readPicker($('eSeasons')).length)
     setPicker($('eSeasons'),p[1].split(' ').map(c=>SEASONCODE[c]).filter(Boolean));
   if(!readPicker($('eVibes')).length)setPicker($('eVibes'),p[2].split(' '));
@@ -1489,6 +1497,7 @@ $('eSave').onclick=async()=>{
     vibes:readPicker($('eVibes')),
     fill:Number($('eFill').value),
     notes:$('eNotes').value.trim(),
+    notesEdited:($('eNotes').value.trim()!==($('eNotes').dataset.filled||'')),
     comment:$('eComment').value.trim(),
     photo:pendingPhoto
   };
@@ -1832,7 +1841,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0812261223';
+const BUILD='0812261425';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
@@ -2060,11 +2069,11 @@ function renderPick(){
     <div class="lay">
       <h4>${esc(it.name)}</h4>
       <p class="ord">${esc(it.house)} &middot; ${it.kind==='dupe'?'a dupe':'an original'}${retail?' &middot; about $'+retail:''}${onShelf(it.name,it.house)?' &middot; <b style="color:var(--accent)">(on your shelf)</b>':''}</p>
-      ${shownNotes?`<p class="why">${esc(shownNotes)}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
+      ${shownNotes?`<p class="why">${esc(shownNotes)}${notesVerified(it.house,it.name)?'':'<span class="unver">unverified</span>'}</p>`:'<p class="why" style="opacity:.6">No notes on file for this one.</p>'}
       ${onShelf(it.name,it.house)?'':`<div class="mini"><button data-add="${esc(it.name)}|${esc(it.house)}|${it.kind}|${esc(comps.find(c=>c.why==='the original it copies')?comps.find(c=>c.why==='the original it copies').name:'')}">Add to my shelf</button>
         <button data-wish="${esc(it.name)}|${esc(it.house)}">${onWish(it.name,it.house)?'On the list':'Wish list'}</button></div>`}
     </div>
-    <div class="mini" style="margin-bottom:4px">
+    <div class="linkrow on" style="margin:14px 0 18px">
       ${sourceUrl(it.name,it.house)?`<button data-source="1">Open on the brand site</button>`:''}
       <button data-look="1">Look it up online</button>
     </div>
@@ -2138,6 +2147,13 @@ function renderHouse(){
 
 const SOURCE={'The Dua Brand':n=>'https://theduabrand.com/products/'+n,'Oakcha':n=>'https://oakcha.com/products/'+n};
 const slug=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+function notesVerified(house,name){
+  const k=(house+' '+name).toLowerCase();
+  if(SCRAPED[k])return true;          /* published by the house itself */
+  const pr=PROF[k];
+  if(pr&&pr[4])return true;           /* checked against a source */
+  return !(pr&&pr[0]);                /* nothing on file is not a claim */
+}
 function notesFor(house,name){
   const k=(house+' '+name).toLowerCase();
   const pr=PROF[k];
