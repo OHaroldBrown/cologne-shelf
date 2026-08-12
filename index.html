@@ -202,7 +202,8 @@ header{
 body.arrange .card .grip{display:flex}
 body.arrange .card{cursor:grab;touch-action:none;user-select:none}
 #arrangeBtn[aria-pressed="true"]{background:var(--ink);color:var(--glass);border-color:var(--ink)}
-.sheet .sheetbar{background:var(--panel)}
+.sheet .sheetbar{
+  background:var(--glass);position:sticky;top:0;z-index:5;background:var(--panel)}
 .sheetbar strong{color:var(--accent)}
 .btn.wide{background:var(--tint);border-color:var(--line)}
 .btn.wide:active{background:var(--panel)}
@@ -262,10 +263,10 @@ html[data-theme="dark"] .dial b.on{color:#0C1416}
 }
 .sheet.open{display:block}
 .sheetbar{
-  position:sticky;top:0;background:var(--glass);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:6;background:var(--glass);border-bottom:1px solid var(--line);
   padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px
 }
-.sheetbody{padding:14px;max-width:640px;margin:0 auto}
+.sheetbody{background:var(--glass);padding:14px;max-width:640px;margin:0 auto}
 .hero{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line);background:var(--panel);display:block}
 .dname{font-size:34px;line-height:1;margin-top:14px}
 .dhouse{font-size:15px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-top:6px}
@@ -332,7 +333,7 @@ input[type=file]{display:none}
   html,body{background:#fff !important;color:#000 !important}
   :root{--glass:#fff;--panel:#fff;--ink:#000;--line:#000;--accent:#000;--onAccent:#fff;--vetiver:#000;--warn:#000}
   header,.fab,.chips,#search,.actions,.iconbtn,.toast{display:none !important}
-  .sheet{display:none !important}
+  .sheet{background:var(--glass);display:none !important}
   .grid{display:block;padding:0}
   .card{border:0;border-bottom:1px solid #000;display:grid;grid-template-columns:70px 1fr;gap:10px;page-break-inside:avoid;padding:6px 0}
   .shot{aspect-ratio:3/4}
@@ -366,7 +367,7 @@ input[type=file]{display:none}
 <p id="stNote"></p>
 
 <div class="grid" id="grid"></div>
-<div id="build">Designed by Harold Brown<br>BUILD 0812261210</div>
+<div id="build">Designed by Harold Brown<br>BUILD 0812261223</div>
 <div class="empty" id="empty" style="display:none">
   <h2 class="disp" style="font-size:26px">Nothing on the shelf yet</h2>
   <p>Tap the plus to add your first bottle. Snap the bottle, set the seasons, and note what it copies.</p>
@@ -465,8 +466,8 @@ input[type=file]{display:none}
       </div>
       <input type="file" id="ePhoto" accept="image/*">
     </div>
-    <div class="field"><label>Name</label><input type="text" id="eName" list="nameList" autocapitalize="words"><datalist id="nameList"></datalist></div>
-    <div class="field"><label>House</label><input type="text" id="eHouse" list="houseList" autocapitalize="words"><datalist id="houseList"></datalist></div>
+    <div class="field"><label>Name</label><input type="text" id="eName" list="nameList" autocomplete="off" autocapitalize="words"><datalist id="nameList"></datalist></div>
+    <div class="field"><label>House</label><input type="text" id="eHouse" list="houseList" autocomplete="off" autocapitalize="words"><datalist id="houseList"></datalist></div>
     <div id="eLinks" class="linkrow"></div>
     <div class="field">
       <label>What is it</label>
@@ -503,7 +504,7 @@ input[type=file]{display:none}
       </div>
     </div>
     <div class="field" id="eCloneWrap" style="display:none">
-      <label>Dupe of</label><input type="text" id="eClone" list="originalList" autocapitalize="words"><datalist id="originalList"></datalist>
+      <label>Dupe of</label><input type="text" id="eClone" list="originalList" autocomplete="off" autocapitalize="words"><datalist id="originalList"></datalist>
       <p class="lbl" style="margin:6px 0 0;font-weight:400;letter-spacing:.04em;text-transform:none">Picking a known one fills in its retail price. Edit it if yours differs.</p>
     </div>
     <div class="two">
@@ -582,7 +583,7 @@ input[type=file]{display:none}
       <button class="btn wide" id="mWipe" style="color:var(--warn);border-color:var(--warn)">Delete everything and start over</button>
 
     </div>
-    <p class="lbl" style="margin:22px 0 0">BUILD 0812261210</p>
+    <p class="lbl" style="margin:22px 0 0">BUILD 0812261223</p>
     <input type="file" id="mFile" accept=".json,.txt,application/json,text/plain" hidden>
     <input type="file" id="mCsvFile" accept=".csv,text/csv,text/plain" hidden>
   </div>
@@ -615,48 +616,215 @@ const store={
    ORIGINALS: name, house, rough US list price for a full bottle.
    Prices are a starting point only. Edit any of them per bottle. */
 const ORIGINALS=[
-['Aventus','Creed',495],['Green Irish Tweed','Creed',445],['Silver Mountain Water','Creed',425],
-['Virgin Island Water','Creed',425],['Royal Oud','Creed',555],['Aventus Cologne','Creed',415],
-['Sauvage EDT','Dior',125],['Sauvage Elixir','Dior',220],['Homme Intense','Dior',150],
-['Fahrenheit','Dior',135],['Homme 2020','Dior',130],['Bois d Argent','Dior',300],
-['Bleu de Chanel EDP','Chanel',150],['Allure Homme Sport','Chanel',125],['Egoiste','Chanel',130],
-['Coco Mademoiselle','Chanel',160],['Chance','Chanel',150],
-['Tobacco Vanille','Tom Ford',450],['Oud Wood','Tom Ford',400],['Tuscan Leather','Tom Ford',450],
-['Noir Extreme','Tom Ford',210],['Ombre Leather','Tom Ford',200],['Lost Cherry','Tom Ford',450],
-['Bitter Peach','Tom Ford',450],['Neroli Portofino','Tom Ford',400],['Black Orchid','Tom Ford',200],
-['Baccarat Rouge 540','Maison Francis Kurkdjian',325],['Baccarat Rouge 540 Extrait','Maison Francis Kurkdjian',495],
-['Grand Soir','Maison Francis Kurkdjian',300],['Oud Satin Mood','Maison Francis Kurkdjian',400],
-['Angels Share','Kilian',295],['Black Phantom','Kilian',295],['Straight to Heaven','Kilian',295],
-['Layton','Parfums de Marly',355],['Herod','Parfums de Marly',355],['Pegasus','Parfums de Marly',355],
-['Percival','Parfums de Marly',355],['Delina','Parfums de Marly',355],['Godolphin','Parfums de Marly',355],
-['Oud for Greatness','Initio',395],['Side Effect','Initio',395],['Rehab','Initio',395],
-['Naxos','Xerjoff',380],['Erba Pura','Xerjoff',320],['Alexandria II','Xerjoff',600],
-['Interlude Man','Amouage',375],['Reflection Man','Amouage',375],
-['La Nuit de L Homme','Yves Saint Laurent',135],['Y EDP','Yves Saint Laurent',135],['MYSLF','Yves Saint Laurent',140],
-['1 Million','Paco Rabanne',130],['Invictus','Paco Rabanne',125],['Phantom','Paco Rabanne',125],
-['Eros','Versace',115],['Dylan Blue','Versace',115],['Eros Flame','Versace',125],
-['Acqua di Gio Profumo','Giorgio Armani',135],['Code','Giorgio Armani',115],['Stronger With You','Giorgio Armani',115],
-['Le Male','Jean Paul Gaultier',105],['Le Male Le Parfum','Jean Paul Gaultier',135],['Ultra Male','Jean Paul Gaultier',120],
-['Luna Rossa Carbon','Prada',120],['L Homme','Prada',125],
-['Born in Roma Uomo','Valentino',135],['The Most Wanted','Azzaro',125],['Wanted','Azzaro',115],
-['Explorer','Montblanc',115],['Legend','Montblanc',105],
-['Angel Men','Mugler',105],['Spicebomb Extreme','Viktor and Rolf',135],
-['Bottled','Hugo Boss',105],['Voyage','Nautica',35],['Polo Blue','Ralph Lauren',115],
-['The One','Dolce and Gabbana',115],['K','Dolce and Gabbana',115],['Light Blue','Dolce and Gabbana',110],
-['Guilty','Gucci',115],['Gentleman EDP','Givenchy',125],['Hero','Burberry',135],
-['Bad Boy','Carolina Herrera',125],['Man in Black','Bvlgari',115],
-['Santal 33','Le Labo',230],['Another 13','Le Labo',230],
-['Gypsy Water','Byredo',230],['Bal d Afrique','Byredo',230],
-['Jazz Club','Maison Margiela',165],['By the Fireplace','Maison Margiela',165],
-['Hacivat','Nishane',300],['Ani','Nishane',300],
-['Elysium','Roja Parfums',400],['Enigma','Roja Parfums',500],
-['Cedrat Boise','Mancera',165],['Intense Cafe','Montale',160],
-['La Vie Est Belle','Lancome',130],['Good Girl','Carolina Herrera',130],
+['Aventus','Creed',495],
+['Green Irish Tweed','Creed',445],
+['Silver Mountain Water','Creed',425],
+['Virgin Island Water','Creed',425],
+['Royal Oud','Creed',555],
+['Aventus Cologne','Creed',415],
+['Sauvage EDT','Dior',125],
+['Sauvage Elixir','Dior',220],
+['Homme Intense','Dior',150],
+['Fahrenheit','Dior',135],
+['Homme 2020','Dior',130],
+['Bois d Argent','Dior',300],
+['Bleu de Chanel EDP','Chanel',150],
+['Allure Homme Sport','Chanel',125],
+['Egoiste','Chanel',130],
+['Coco Mademoiselle','Chanel',160],
+['Chance','Chanel',150],
+['Tobacco Vanille','Tom Ford',450],
+['Oud Wood','Tom Ford',400],
+['Tuscan Leather','Tom Ford',450],
+['Noir Extreme','Tom Ford',210],
+['Ombre Leather','Tom Ford',200],
+['Lost Cherry','Tom Ford',450],
+['Bitter Peach','Tom Ford',450],
+['Neroli Portofino','Tom Ford',400],
+['Black Orchid','Tom Ford',200],
+['Baccarat Rouge 540','Maison Francis Kurkdjian',325],
+['Baccarat Rouge 540 Extrait','Maison Francis Kurkdjian',495],
+['Grand Soir','Maison Francis Kurkdjian',300],
+['Oud Satin Mood','Maison Francis Kurkdjian',400],
+['Angels Share','Kilian',295],
+['Black Phantom','Kilian',295],
+['Straight to Heaven','Kilian',295],
+['Layton','Parfums de Marly',355],
+['Herod','Parfums de Marly',355],
+['Pegasus','Parfums de Marly',355],
+['Percival','Parfums de Marly',355],
+['Delina','Parfums de Marly',355],
+['Godolphin','Parfums de Marly',355],
+['Oud for Greatness','Initio',395],
+['Side Effect','Initio',395],
+['Rehab','Initio',395],
+['Naxos','Xerjoff',380],
+['Erba Pura','Xerjoff',320],
+['Alexandria II','Xerjoff',600],
+['Interlude Man','Amouage',375],
+['Reflection Man','Amouage',375],
+['La Nuit de L Homme','Yves Saint Laurent',135],
+['Y EDP','Yves Saint Laurent',135],
+['MYSLF','Yves Saint Laurent',140],
+['1 Million','Paco Rabanne',130],
+['Invictus','Paco Rabanne',125],
+['Phantom','Paco Rabanne',125],
+['Eros','Versace',115],
+['Dylan Blue','Versace',115],
+['Eros Flame','Versace',125],
+['Acqua di Gio Profumo','Giorgio Armani',135],
+['Code','Giorgio Armani',115],
+['Stronger With You','Giorgio Armani',115],
+['Le Male','Jean Paul Gaultier',105],
+['Le Male Le Parfum','Jean Paul Gaultier',135],
+['Ultra Male','Jean Paul Gaultier',120],
+['Luna Rossa Carbon','Prada',120],
+['L Homme','Prada',125],
+['Born in Roma Uomo','Valentino',135],
+['The Most Wanted','Azzaro',125],
+['Wanted','Azzaro',115],
+['Explorer','Montblanc',115],
+['Legend','Montblanc',105],
+['Angel Men','Mugler',105],
+['Spicebomb Extreme','Viktor and Rolf',135],
+['Bottled','Hugo Boss',105],
+['Voyage','Nautica',35],
+['Polo Blue','Ralph Lauren',115],
+['The One','Dolce and Gabbana',115],
+['K','Dolce and Gabbana',115],
+['Light Blue','Dolce and Gabbana',110],
+['Guilty','Gucci',115],
+['Gentleman EDP','Givenchy',125],
+['Hero','Burberry',135],
+['Bad Boy','Carolina Herrera',125],
+['Man in Black','Bvlgari',115],
+['Santal 33','Le Labo',230],
+['Another 13','Le Labo',230],
+['Gypsy Water','Byredo',230],
+['Bal d Afrique','Byredo',230],
+['Jazz Club','Maison Margiela',165],
+['By the Fireplace','Maison Margiela',165],
+['Hacivat','Nishane',300],
+['Ani','Nishane',300],
+['Elysium','Roja Parfums',400],
+['Enigma','Roja Parfums',500],
+['Cedrat Boise','Mancera',165],
+['Intense Cafe','Montale',160],
+['La Vie Est Belle','Lancome',130],
+['Good Girl','Carolina Herrera',130],
 ['Bianco Latte','Giardini di Toscana',155],
-['Eternity','Calvin Klein',85],['Obsession','Calvin Klein',80],['CK One','Calvin Klein',75],['Escape','Calvin Klein',80],['Defy','Calvin Klein',95],['Eternity Aqua','Calvin Klein',90],['Sauvage','Dior',115],['Sauvage Elixir','Dior',185],['Dior Homme','Dior',130],['Dior Homme Intense','Dior',150],['Eau Sauvage','Dior',110],['Fahrenheit','Dior',120],['Bleu de Chanel','Chanel',135],['Allure Homme Sport','Chanel',115],['Egoiste','Chanel',120],['Antaeus','Chanel',120],['Coco Mademoiselle','Chanel',150],['Chance','Chanel',145],['Aqua di Gio','Giorgio Armani',95],['Aqua di Gio Profondo','Giorgio Armani',115],['Stronger With You','Giorgio Armani',95],['Code','Giorgio Armani',105],['Eros','Versace',105],['Eros Flame','Versace',110],['Dylan Blue','Versace',100],['The Most Wanted','Azzaro',115],['Chrome','Azzaro',95],['Wanted','Azzaro',100],['Invictus','Paco Rabanne',105],['1 Million','Paco Rabanne',105],['Phantom','Paco Rabanne',110],['Le Male','Jean Paul Gaultier',95],['Le Male Elixir','Jean Paul Gaultier',135],['Scandal Pour Homme','Jean Paul Gaultier',110],['Ultra Male','Jean Paul Gaultier',105],['La Nuit de L Homme','Yves Saint Laurent',110],['L Homme','Yves Saint Laurent',110],['MYSLF','Yves Saint Laurent',130],['Black Opium','Yves Saint Laurent',140],['Bad Boy','Carolina Herrera',105],['212 VIP','Carolina Herrera',100],['Good Girl','Carolina Herrera',125],['Luna Rossa Ocean','Prada',115],['L Homme Prada','Prada',115],['Boss Bottled','Hugo Boss',95],['The Scent','Hugo Boss',95],['Explorer','Montblanc',85],['Legend','Montblanc',85],['Spicebomb','Viktor and Rolf',110],['Spicebomb Extreme','Viktor and Rolf',130],['Flowerbomb','Viktor and Rolf',175],['Polo Blue','Ralph Lauren',95],['Polo Black','Ralph Lauren',95],['Pegasus','Parfums de Marly',355],['Althair','Parfums de Marly',355],['Percival','Parfums de Marly',355],['Oud for Greatness','Initio',380],['Side Effect','Initio',380],['Rehab','Initio',380],['Grand Soir','Maison Francis Kurkdjian',300],['724','Maison Francis Kurkdjian',225],['Amber Aoud','Roja Dove',595],['Elysium','Roja Dove',450],['Ombre Nomade','Louis Vuitton',380],['Afternoon Swim','Louis Vuitton',320],['Reflection Man','Amouage',390],['Interlude Man','Amouage',390],['Megamare','Orto Parisi',235],['Chocolate Greedy','Montale',150],['Orchidee Vanille','Van Cleef and Arpels',200],['Do Son','Diptyque',175],['Matcha 26','Le Labo',215],['Another 13','Le Labo',215],['Bergamote 22','Le Labo',215],['Millesime Imperial','Creed',445],['Original Santal','Creed',445],['Aventus Absolu','Creed',595],['Lost Cherry','Tom Ford',420],['Fucking Fabulous','Tom Ford',450],['Noir Extreme','Tom Ford',200],['Kirke','Tiziana Terenzi',290],['Angels Share','Kilian',300],['Black Phantom','Kilian',300],
-['Gold','Commodity',155],['Book','Commodity',155],['Paper','Commodity',155],['Juice','Commodity',155],
-['Imagination','Louis Vuitton',320],['Paradigme','Prada',140],
-['Bleu de Chanel L Exclusif','Chanel',275],['Euphoria Men','Calvin Klein',100]
+['Eternity','Calvin Klein',85],
+['Obsession','Calvin Klein',80],
+['CK One','Calvin Klein',75],
+['Escape','Calvin Klein',80],
+['Defy','Calvin Klein',95],
+['Eternity Aqua','Calvin Klein',90],
+['Sauvage','Dior',115],
+['Dior Homme','Dior',130],
+['Dior Homme Intense','Dior',150],
+['Eau Sauvage','Dior',110],
+['Bleu de Chanel','Chanel',135],
+['Antaeus','Chanel',120],
+['Aqua di Gio','Giorgio Armani',95],
+['Aqua di Gio Profondo','Giorgio Armani',115],
+['Chrome','Azzaro',95],
+['Le Male Elixir','Jean Paul Gaultier',135],
+['Scandal Pour Homme','Jean Paul Gaultier',110],
+['L Homme','Yves Saint Laurent',110],
+['Black Opium','Yves Saint Laurent',140],
+['212 VIP','Carolina Herrera',100],
+['Luna Rossa Ocean','Prada',115],
+['L Homme Prada','Prada',115],
+['Boss Bottled','Hugo Boss',95],
+['The Scent','Hugo Boss',95],
+['Spicebomb','Viktor and Rolf',110],
+['Flowerbomb','Viktor and Rolf',175],
+['Polo Black','Ralph Lauren',95],
+['Althair','Parfums de Marly',355],
+['724','Maison Francis Kurkdjian',225],
+['Amber Aoud','Roja Dove',595],
+['Elysium','Roja Dove',450],
+['Ombre Nomade','Louis Vuitton',380],
+['Afternoon Swim','Louis Vuitton',320],
+['Megamare','Orto Parisi',235],
+['Chocolate Greedy','Montale',150],
+['Orchidee Vanille','Van Cleef and Arpels',200],
+['Do Son','Diptyque',175],
+['Matcha 26','Le Labo',215],
+['Bergamote 22','Le Labo',215],
+['Millesime Imperial','Creed',445],
+['Original Santal','Creed',445],
+['Aventus Absolu','Creed',595],
+['Fucking Fabulous','Tom Ford',450],
+['Kirke','Tiziana Terenzi',290],
+['Gold','Commodity',155],
+['Book','Commodity',155],
+['Paper','Commodity',155],
+['Juice','Commodity',155],
+['Imagination','Louis Vuitton',320],
+['Paradigme','Prada',140],
+['Bleu de Chanel L Exclusif','Chanel',275],
+['Euphoria Men','Calvin Klein',100],
+['Signature','Montblanc',95],
+['Signature Absolue','Montblanc',110],
+['Emblem','Montblanc',80],
+['Individuel','Montblanc',85],
+['Starwalker','Montblanc',85],
+['Explorer Ultra Blue','Montblanc',95],
+['Explorer Platinum','Montblanc',95],
+['Legend Spirit','Montblanc',85],
+['Legend Blue','Montblanc',100],
+['Legend Red','Montblanc',95],
+['Homme Sport','Dior',105],
+['Joy','Dior',130],
+['Jadore','Dior',145],
+['Miss Dior','Dior',140],
+['Homme Parfum','Dior',145],
+['Ambre Nuit','Dior',290],
+['Oud Ispahan','Dior',290],
+['Coco Noir','Chanel',150],
+['No 5','Chanel',160],
+['Bleu de Chanel Parfum','Chanel',165],
+['Allure Homme','Chanel',115],
+['Platinum Egoiste','Chanel',120],
+['Acqua di Gio Parfum','Giorgio Armani',130],
+['My Way','Giorgio Armani',125],
+['Si','Giorgio Armani',130],
+['Eros Parfum','Versace',120],
+['Pour Homme','Versace',95],
+['Bright Crystal','Versace',95],
+['Crystal Noir','Versace',95],
+['Y Le Parfum','Yves Saint Laurent',140],
+['La Nuit de LHomme Le Parfum','Yves Saint Laurent',140],
+['Libre','Yves Saint Laurent',140],
+['Mon Paris','Yves Saint Laurent',135],
+['Soleil Blanc','Tom Ford',280],
+['Costa Azzurra','Tom Ford',280],
+['Layton Exclusif','Parfums de Marly',395],
+['Carlisle','Parfums de Marly',355],
+['Kalan','Parfums de Marly',355],
+['Viking','Creed',445],
+['Bois du Portugal','Creed',445],
+['Himalaya','Creed',445],
+['Enigma','Roja Dove',450],
+['Invictus Victory','Paco Rabanne',130],
+['1 Million Elixir','Paco Rabanne',125],
+['Olympea','Paco Rabanne',115],
+['Lady Million','Paco Rabanne',115],
+['Boss Bottled Elixir','Hugo Boss',115],
+['Boss Bottled Night','Hugo Boss',95],
+['Sauvage Parfum','Dior',160],
+['Wanted by Night','Azzaro',115],
+['Aventus for Her','Creed',445],
+['Aqua Universalis','Maison Francis Kurkdjian',245],
+['Amyris Homme','Maison Francis Kurkdjian',245],
+['Ege','Nishane',320],
+['Terroni','Orto Parisi',235],
+['Stercus','Orto Parisi',235],
+['Rose 31','Le Labo',215],
+['Thé Noir 29','Le Labo',215],
+['Torino 21','Xerjoff',240],
+['Ivory Route','Xerjoff',320]
 ];
 const CLONES=[
 ['Club de Nuit Intense Man','Armaf'],['Club de Nuit Sillage','Armaf'],['Club de Nuit Untold','Armaf'],
@@ -1664,7 +1832,7 @@ $('lClose').onclick=()=>hide('layers');
 $('mLayers').onclick=()=>{hide('menu');openLayers();};
 
 /* ---------------- version check ---------------- */
-const BUILD='0812261210';
+const BUILD='0812261223';
 async function checkBuild(){
   try{
     const r=await fetch('./index.html?cb='+Date.now(),{cache:'no-store'});
